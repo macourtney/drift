@@ -1,4 +1,6 @@
 pom.xml
 *jar
+.project
+.classpath
 lib
 classes

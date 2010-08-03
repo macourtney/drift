@@ -1,15 +1,57 @@
 # drift
 
-FIXME: write description
+Drift is a migration library written in Clojure. Drift works much like Rails migrations where a directory in your
+project contains all of the migration files. Drift will detect which migration files need to be run and run them as
+appropriate.
 
 ## Usage
 
-FIXME: write
+To use Drift you'll need to add drift to your Leiningen project. Simply add the following to your project.clj file:
 
-## Installation
+[drift "1.0.0-SNAPSHOT"]
 
-FIXME: write
+Note: Currently Drift is not on Clojars. You will need to clone drift and install it locally for the above to work.
+
+To set your Drift migration directory, simply add a clojure file called "migrate_config.clj" to the directory
+"src/config".
+
+Your migrate_config.clj file should look something like:
+
+ (ns config.migrate-config)
+
+ (defn migrate-config []
+   { :directory "/test/migrations"
+     :current-db-version current-db-version-fn
+     :update-db-version update-db-version-fn })
+
+Current-db-version-fn and update-db-version-fn are both function which you must implement to let Drift read and set the
+current db version.
+
+Current-db-version-fn does not take any parameters, and returns the current version of the database. If no version has
+been set, then current-db-version-fn must return 0.
+
+Update-db-version-fn takes only a new-version parameter. After update-db-version-fn is run with a given new-version,
+current-db-version-fn must return that version.
+
+For example, here is an in memory db version (Note, you do not want to do this):
+
+ (ns config.migrate-config)
+ 
+ (def version (atom nil))
+ 
+ (defn memory-current-db-version []
+   (or @version 0)) 
+ 
+ (defn memory-update-db-version [new-version]
+   (swap! version #(identity %2) new-version)) 
+ 
+ (defn migrate-config []
+   { :directory "/test/migrations"
+     :current-db-version memory-current-db-version
+     :update-db-version memory-update-db-version })
+
+TODO: Running drift with Leiningen.
 
 ## License
 
-FIXME: write
+Copyright © 2009 Matthew Courtney and released under the Apache 2.0 license.
