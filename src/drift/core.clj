@@ -7,9 +7,6 @@
 
 (def migrate-dir "migrate")
 
-(def schema-info-table "schema_info")
-(def version-column :version)
-
 (def config-ns-symbol 'config.migrate-config)
 
 (defn
@@ -46,6 +43,21 @@
   (when-let [migrate-config-namespace (find-config-namespace)]
     (when-let [migrate-config-fn (ns-resolve migrate-config-namespace 'migrate-config)]
       (migrate-config-fn))))
+
+(defn
+#^{ :doc "Finds the init function from the config. The init function should be run before each migration." }
+  find-init-fn []
+  (:init (find-config)))
+
+(defn
+#^{ :doc "Runs the init function with the given args." }
+  run-init [args]
+  (when-let [init-fn (find-init-fn)]
+    (init-fn args)))
+
+(defn
+  default-ns-content []
+  (:ns-content (find-config)))
 
 (defn
 #^{ :doc "Finds the migrate directory name." }
@@ -106,7 +118,7 @@
       (filter 
         (fn [migrate-file] 
           (re-find #"^[0-9]+_.+\.clj$" (. migrate-file getName))) 
-        (. migrate-directory listFiles)))))
+        (.listFiles migrate-directory)))))
 
 (defn 
 #^{ :doc "Returns all of the migration file names as a collection." }

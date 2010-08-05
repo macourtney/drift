@@ -43,5 +43,5 @@ then this method simply returns it."}
             migration-file-name (str (prefill (str next-migrate-number) 3 "0") "_" (core/dashes-to-underscores migration-name) ".clj")
             migration-file (new File migrate-directory  migration-file-name)]
         (logging/info (str "Creating migration file " migration-file-name "..."))
-        (. migration-file createNewFile)
+        (.createNewFile migration-file)
         migration-file))))

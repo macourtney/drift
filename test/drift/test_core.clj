@@ -2,7 +2,8 @@
   (:import [java.io File])
   (:use clojure.contrib.test-is
         drift.core)
-  (:require [clojure.contrib.logging :as logging]))
+  (:require [clojure.contrib.logging :as logging]
+            [config.migrate-config :as migrate-config]))
 
 (def migration-name "create-tests")
 
@@ -13,6 +14,12 @@
   (let [config-map (find-config)]
     (is config-map)
     (is (map? config-map))))
+
+(deftest test-find-init-fn
+  (is (= migrate-config/init (find-init-fn))))
+
+(deftest test-default-ns-content
+  (is (= "\n  (:use clojure.contrib.sql)" (default-ns-content))))
 
 (deftest test-find-migrate-dir-name
   (let [migrate-dir-name (find-migrate-dir-name)]
