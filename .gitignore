@@ -3,4 +3,5 @@ pom.xml
 .project
 .classpath
 lib
+bin
 classes
