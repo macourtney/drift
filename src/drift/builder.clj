@@ -39,7 +39,7 @@ then this method simply returns it."}
   ([migration-name] (create-migration-file (find-or-create-migrate-directory) migration-name)) 
   ([migrate-directory migration-name]
     (if (and migrate-directory migration-name)
-      (let [next-migrate-number (core/find-next-migrate-number migrate-directory)
+      (let [next-migrate-number (core/find-next-migrate-number)
             migration-file-name (str (prefill (str next-migrate-number) 3 "0") "_" (core/dashes-to-underscores migration-name) ".clj")
             migration-file (new File migrate-directory  migration-file-name)]
         (logging/info (str "Creating migration file " migration-file-name "..."))

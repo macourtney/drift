@@ -2,39 +2,7 @@
   (:import [java.io File])
   (:require [clojure.contrib.logging :as logging]
             [drift.core :as core]
-            [drift.version :as version]
-            ;[conjure.core.model.database :as database]
-            ))
-
-;(defn 
-;#^{ :doc "Gets the current db version number. If the schema info table doesn't exist this function creates it. If the 
-;schema info table is empty, then it adds a row and sets the version to 0." }
-;  current-db-version
-;  ([] (current-db-version false))
-;  ([quiet]
-;    (if (database/table-exists? core/schema-info-table)
-;      (do
-;        (logging/info (str core/schema-info-table " exists"))
-;        (let [version-results (database/sql-find { :table core/schema-info-table :limit 1 })
-;              version-result-map (first version-results)]
-;          (if version-result-map
-;            (get version-result-map core/version-column)
-;            (do
-;              (logging/info (str core/schema-info-table " is empty."))
-;              (database/insert-into core/schema-info-table { core/version-column 0 })
-;              0))))
-;      (do
-;        (logging/info (str core/schema-info-table " does not exist. Creating table..."))
-;        (database/create-table core/schema-info-table 
-;          (database/integer "version" { :not-null true }))
-;        (logging/info "Setting the initial version to 0.")
-;        (database/insert-into core/schema-info-table {core/version-column 0})
-;        0))))
-
-;(defn
-;#^{ :doc "Updates the version number saved in the schema table in the database." }
-;  update-db-version [new-version]
-;  (database/update core/schema-info-table ["true"] { core/version-column new-version }))
+            [drift.version :as version]))
 
 (defn
 #^{ :doc "Runs the up function in the given migration file." }
@@ -127,7 +95,7 @@ version number, then this function causes a roll back." }
     (if version-number
       (let [db-version (version/current-db-version)]
         (logging/info (str "Current database version: " db-version))
-        (let [version-number-min (min (max version-number 0) (core/max-migration-number (core/find-migrate-directory)))]
+        (let [version-number-min (min (max version-number 0) (core/max-migration-number))]
           (logging/info (str "Updating to version: " version-number-min))
           (if (< db-version version-number-min)
             (migrate-up (+ db-version 1) version-number-min quiet)

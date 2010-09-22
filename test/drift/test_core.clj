@@ -53,6 +53,15 @@
   (is (= "migrate" (migrate-namespace-prefix-from-directory "migrate")))
   (is (nil? (migrate-namespace-prefix-from-directory nil))))
 
+(deftest test-migration-namespaces
+  (let [migration-namespaces (migration-namespaces)]
+    (is (= 2 (count migration-namespaces)))
+    (is (= ["migrations.001-create-tests" "migrations.002-test-update"] (map namespace-name-str migration-namespaces)))))
+
+(deftest test-migration-number-from-namespace
+  (is (= 1 (migration-number-from-namespace "migrations.001-create-tests")))
+  (is (= 2 (migration-number-from-namespace "migrations.002-test-update"))))
+
 (deftest test-find-migrate-directory
   (let [migrate-directory (find-migrate-directory)]
     (is (not (nil? migrate-directory)))
@@ -76,7 +85,7 @@
     (is (instance? String (first all-migration-names))))
   (is (not (nil? (all-migration-file-names))))
   (is (nil? (all-migration-file-names nil))))
-  
+
 (deftest test-migration-number-from-file
   (let [migration-file (new File "001-create-test.clj")
         migration-number (migration-number-from-file migration-file)]
@@ -89,37 +98,26 @@
     (is (= migration-number 0)))
   (is (thrown? NumberFormatException (migration-number-from-file (new File "create-test.clj"))))
   (is (nil? (migration-number-from-file nil))))
-  
+
 (deftest test-migration-files-in-range
   (let [migration-files (migration-files-in-range 0 1)]
     (is (not-empty migration-files)))
   (let [migration-files (migration-files-in-range 0 0)]
     (is (empty migration-files))))
-    
+
 (deftest test-all-migration-numbers
-  (let [migration-numbers (all-migration-numbers (find-migrate-directory))]
-    (is (not-empty migration-numbers))
-    (is (number? (first migration-numbers))))
   (let [migration-numbers (all-migration-numbers)]
     (is (not-empty migration-numbers))
-    (is (number? (first migration-numbers))))
-  (is (nil? (all-migration-numbers nil))))
-  
+    (is (number? (first migration-numbers)))
+    (is (= [1 2]  migration-numbers))))
+
 (deftest test-max-migration-number
-  (let [max-number (max-migration-number (find-migrate-directory))]
-    (is (= max-number 2)))
   (let [max-number (max-migration-number)]
-    (is (= max-number 2)))
-  (is (nil? (max-migration-number nil))))
-  
+    (is (= max-number 2))))
+
 (deftest test-find-next-migrate-number
-  (let [current-number (max-migration-number (find-migrate-directory))]
-    (let [next-number (find-next-migrate-number (find-migrate-directory))]
-      (is (= next-number (inc current-number))))
-    (let [next-number (find-next-migrate-number)]
-      (is (= next-number (inc current-number)))))
-  (is (nil? (find-next-migrate-number nil))))
-  
+  (is (= (find-next-migrate-number) (inc (max-migration-number)))))
+
 (deftest test-find-migration-file
   (let [migration-file (find-migration-file (find-migrate-directory) migration-name)]
     (is (not (nil? migration-file)))

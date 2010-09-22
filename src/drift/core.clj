@@ -1,6 +1,7 @@
 (ns drift.core
   (:import [java.io File])
-  (:require [clojure.contrib.find-namespaces :as find-namespaces]
+  (:require [clojure.string :as string]
+            [clojure.contrib.find-namespaces :as find-namespaces]
             [clojure.contrib.logging :as logging]
             [clojure.contrib.seq-utils :as seq-utils]
             [clojure.contrib.str-utils :as clojure-str-utils]))
@@ -67,7 +68,7 @@
 (defn
 #^{:doc "Returns the directory where Conjure is running from."}
   user-directory []
-  (new File (. (System/getProperties) getProperty "user.dir")))
+  (new File (.getProperty (System/getProperties) "user.dir")))
 
 (defn
   migrate-directory []
@@ -84,7 +85,9 @@
 (defn
 #^{ :doc "Finds the migrate directory." }
   find-migrate-directory []
-  (find-directory (user-directory) (find-migrate-dir-name)))
+  (let [user-directory (user-directory)
+        migrate-dir-name (find-migrate-dir-name)]
+    (find-directory user-directory migrate-dir-name)))
 
 (defn
   file-separator-index [path-str]
@@ -108,6 +111,25 @@
 (defn
   migrate-namespace-prefix []
   (or (:namespace-prefix (find-config)) (migrate-namespace-prefix-from-directory)))
+
+(defn
+  namespace-name-str [migration-namespace]
+  (when migration-namespace
+    (if (string? migration-namespace)
+      migration-namespace
+      (name (ns-name migration-namespace)))))
+
+(defn
+  migration-namespace? [migration-namespace]
+  (.startsWith (namespace-name-str migration-namespace) (str (migrate-namespace-prefix) ".")))
+
+(defn
+  migration-namespaces []
+  (filter migration-namespace? (all-ns)))
+
+(defn
+  migration-number-from-namespace [migration-namespace]
+  (Integer/parseInt (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))))
 
 (defn 
 #^{ :doc "Returns all of the migration files as a collection." }
@@ -153,45 +175,31 @@
 
 (defn 
 #^{ :doc "Returns all of the numbers prepended to the migration files." }
-  all-migration-numbers
-  ([] (all-migration-numbers (find-migrate-directory)))
-  ([migrate-directory]
-    (when migrate-directory
-      (map
-        migration-number-from-name 
-        (all-migration-file-names migrate-directory)))))
+  all-migration-numbers []
+  (map migration-number-from-namespace (migration-namespaces)))
 
 (defn
 #^{ :doc "Returns the maximum number of all migration files." }
-  max-migration-number
-  ([] (max-migration-number (find-migrate-directory)))
-  ([migrate-directory]
-    (if migrate-directory
-      (let [migration-numbers (all-migration-numbers migrate-directory)]
-        (if (> (count migration-numbers) 0) 
-          (eval (cons max migration-numbers))
-          0)))))
+  max-migration-number []
+  (apply max 0 (all-migration-numbers)))
 
 (defn 
 #^{ :doc "Returns the next number to use for a migration file." }
-  find-next-migrate-number
-  ([] (find-next-migrate-number (find-migrate-directory))) 
-  ([migrate-directory]
-    (if migrate-directory
-      (inc (max-migration-number migrate-directory)))))
-  
+  find-next-migrate-number []
+  (inc (max-migration-number)))
+
 (defn
 #^{ :doc "The migration file with the given migration name." }
   find-migration-file 
-    ([migration-name] (find-migration-file (find-migrate-directory) migration-name))
-    ([migrate-directory migration-name]
-      (let [migration-file-name-to-find (str (dashes-to-underscores migration-name) ".clj")]
-        (seq-utils/find-first 
-          (fn [migration-file] 
-            (re-find 
-              (re-pattern (str "[0-9]+_" migration-file-name-to-find))
-              (. migration-file getName)))
-          (all-migration-files migrate-directory)))))
+  ([migration-name] (find-migration-file (find-migrate-directory) migration-name))
+  ([migrate-directory migration-name]
+    (let [migration-file-name-to-find (str (dashes-to-underscores migration-name) ".clj")]
+      (seq-utils/find-first 
+        (fn [migration-file] 
+          (re-find 
+            (re-pattern (str "[0-9]+_" migration-file-name-to-find))
+            (. migration-file getName)))
+        (all-migration-files migrate-directory)))))
 
 (defn
 #^{:doc "If string ends with the string ending, then remove ending and return the result. Otherwise, return string."}
