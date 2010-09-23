@@ -125,7 +125,9 @@
 
 (defn
   migration-namespaces []
-  (filter migration-namespace? (all-ns)))
+  (if-let [migration-namespaces (:migration-namespaces (find-config))]
+    (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
+    (filter migration-namespace? (all-ns))))
 
 (defn
   migration-number-from-namespace [migration-namespace]
