@@ -50,7 +50,28 @@ For example, here is an in memory db version (Note, you do not want to do this):
      :current-db-version memory-current-db-version
      :update-db-version memory-update-db-version })
 
-TODO: Running drift with Leiningen.
+
+Using a table named "schema_migrations" that has one version column with a single value holding the current database version:
+
+(ns config.migrate-config
+  (:require [clojure.contrib.sql :as sql])
+  (:use warehouse.core))
+
+(defn db-version []
+  (sql/with-connection DB
+    (sql/with-query-results res 
+      ["select version from schema_migrations limit 1"]
+      (:version (first res)))))
+
+(defn update-db-version [version]
+  (sql/with-connection DB
+    (sql/insert-values :schema_migrations [:version] [version])))
+
+## Using Leiningen
+
+To migrate to the most recent version:
+
+$ lein migrate
 
 ## License
 
