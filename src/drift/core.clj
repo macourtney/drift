@@ -97,16 +97,19 @@
         (apply min min-args)))))
 
 (defn
+  migrate-namespace-dir
+  ([] (migrate-namespace-dir (find-migrate-dir-name)))
+  ([migrate-dir-name]
+    (if-let [file-separator-index (file-separator-index migrate-dir-name)]
+      (.substring migrate-dir-name (inc file-separator-index))
+       migrate-dir-name)))
+
+(defn
 #^{ :doc "Returns the namespace prefix for the migrate directory name." }
   migrate-namespace-prefix-from-directory
   ([] (migrate-namespace-prefix-from-directory (find-migrate-dir-name)))
   ([migrate-dir-name]
-    (when migrate-dir-name
-      (let [file-separator-index (file-separator-index migrate-dir-name)
-            trimmed-dir-name (if file-separator-index
-                               (.substring migrate-dir-name (inc file-separator-index))
-                               migrate-dir-name)]
-        (slashes-to-dots (underscores-to-dashes trimmed-dir-name))))))
+    (slashes-to-dots (underscores-to-dashes (migrate-namespace-dir migrate-dir-name)))))
 
 (defn
   migrate-namespace-prefix []
