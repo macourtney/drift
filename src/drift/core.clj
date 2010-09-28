@@ -1,36 +1,13 @@
 (ns drift.core
   (:import [java.io File])
   (:require [clojure.string :as string]
-            [clojure.contrib.find-namespaces :as find-namespaces]
             [clojure.contrib.logging :as logging]
             [clojure.contrib.seq-utils :as seq-utils]
-            [clojure.contrib.str-utils :as clojure-str-utils]))
+            [clojure_util.loading-utils :as loading-utils]))
 
 (def migrate-dir "migrate")
 
 (def config-ns-symbol 'config.migrate-config)
-
-(defn
-#^{:doc "Converts all dashes to underscores in string."}
-  dashes-to-underscores [string]
-  (if string
-    (clojure-str-utils/re-gsub #"-" "_" string)
-    string))
-
-(defn
-#^{:doc "Converts all underscores to dashes in string."}
-  underscores-to-dashes [string]
-  (if string
-    (clojure-str-utils/re-gsub #"_" "-" string)
-    string))
-
-(defn
-#^{:doc "Converts all slashes to periods in string."}
-  slashes-to-dots [string]
-  (if string
-    (clojure-str-utils/re-gsub #"/|\\" ; "\" Fixing a bug with syntax highlighting
-       "." string) 
-    string))
 
 (defn
 #^{ :doc "Finds the config namespace." }
@@ -109,11 +86,17 @@
   migrate-namespace-prefix-from-directory
   ([] (migrate-namespace-prefix-from-directory (find-migrate-dir-name)))
   ([migrate-dir-name]
-    (slashes-to-dots (underscores-to-dashes (migrate-namespace-dir migrate-dir-name)))))
+    (loading-utils/slashes-to-dots (loading-utils/underscores-to-dashes (migrate-namespace-dir migrate-dir-name)))))
 
 (defn
   migrate-namespace-prefix []
   (or (:namespace-prefix (find-config)) (migrate-namespace-prefix-from-directory)))
+
+(defn
+#^{ :doc "Returns a string for the namespace of the given file in the given directory." }
+  namespace-string-for-file [file-name]
+  (when file-name
+    (str (migrate-namespace-prefix) "." (loading-utils/clj-file-to-symbol-string file-name))))
 
 (defn
   namespace-name-str [migration-namespace]
@@ -130,63 +113,32 @@
   migration-namespaces []
   (if-let [migration-namespaces (:migration-namespaces (find-config))]
     (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
-    (filter migration-namespace? (all-ns))))
+    (map namespace-string-for-file (loading-utils/all-class-path-file-names (migrate-namespace-dir)))))
 
 (defn
   migration-number-from-namespace [migration-namespace]
   (Integer/parseInt (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))))
 
-(defn 
-#^{ :doc "Returns all of the migration files as a collection." }
-  all-migration-files
-  ([] (all-migration-files (find-migrate-directory)))
-  ([migrate-directory]
-    (if migrate-directory
-      (filter 
-        (fn [migrate-file] 
-          (re-find #"^[0-9]+_.+\.clj$" (. migrate-file getName))) 
-        (.listFiles migrate-directory)))))
-
-(defn 
-#^{ :doc "Returns all of the migration file names as a collection." }
-  all-migration-file-names 
-  ([] (all-migration-file-names (find-migrate-directory)))
-  ([migrate-directory]
-    (if migrate-directory
-      (map 
-        (fn [migration-file] (. migration-file getName))
-        (all-migration-files migrate-directory)))))
-    
-(defn
-#^{ :doc "Returns the migration number from the given migration file name." }
-  migration-number-from-name [migration-file-name]
-  (Integer/parseInt (re-find #"^[0-9]+" migration-file-name)))
-  
-(defn
-#^{ :doc "Returns the migration number from the given migration file." }
-  migration-number-from-file [migration-file]
-  (if migration-file
-    (migration-number-from-name (. migration-file getName))))
-    
 (defn
 #^{ :doc "Returns all of the migration file names with numbers between low-number and high-number inclusive." }
-  migration-files-in-range [low-number high-number]
-  (let [migrate-directory (find-migrate-directory)]
-    (filter 
-      (fn [migration-file] 
-        (let [migration-number (migration-number-from-file migration-file)]
-          (and (>= migration-number low-number) (<= migration-number high-number)))) 
-      (all-migration-files migrate-directory))))
+  migration-namespaces-in-range [low-number high-number]
+  (filter 
+    (fn [migration-namespace] 
+      (let [migration-number (migration-number-from-namespace migration-namespace)]
+        (and (>= migration-number low-number) (<= migration-number high-number)))) 
+    (migration-namespaces)))
 
 (defn 
 #^{ :doc "Returns all of the numbers prepended to the migration files." }
-  all-migration-numbers []
-  (map migration-number-from-namespace (migration-namespaces)))
+  migration-numbers
+  ([] (migration-numbers (migration-namespaces)))
+  ([migration-namespaces]
+    (map migration-number-from-namespace migration-namespaces)))
 
 (defn
 #^{ :doc "Returns the maximum number of all migration files." }
   max-migration-number []
-  (apply max 0 (all-migration-numbers)))
+  (apply max 0 (migration-numbers)))
 
 (defn 
 #^{ :doc "Returns the next number to use for a migration file." }
@@ -194,58 +146,29 @@
   (inc (max-migration-number)))
 
 (defn
+#^{ :doc "Finds the number of the migration file before the given number" }
+  migration-number-before 
+  ([migration-number] (migration-number-before migration-number (migration-namespaces)))
+  ([migration-number migration-namespaces]
+    (when migration-number
+      (apply max 0 (filter #(< %1 migration-number) (migration-numbers migration-namespaces))))))
+
+(defn
+  find-migration-namespace [migration-name]
+  (seq-utils/find-first
+    #(re-find (re-pattern (str (migrate-namespace-prefix) "\\.[0-9]+-" migration-name)) %1)
+    (map namespace-name-str (migration-namespaces))))
+
+(defn
 #^{ :doc "The migration file with the given migration name." }
-  find-migration-file 
+  find-migration-file
   ([migration-name] (find-migration-file (find-migrate-directory) migration-name))
   ([migrate-directory migration-name]
-    (let [migration-file-name-to-find (str (dashes-to-underscores migration-name) ".clj")]
-      (seq-utils/find-first 
-        (fn [migration-file] 
-          (re-find 
-            (re-pattern (str "[0-9]+_" migration-file-name-to-find))
-            (. migration-file getName)))
-        (all-migration-files migrate-directory)))))
-
-(defn
-#^{:doc "If string ends with the string ending, then remove ending and return the result. Otherwise, return string."}
-  strip-ending [string ending]
-  (if (and string ending (.endsWith string ending))
-    (let [ending-index (- (.length string) (.length ending))]
-      (.substring string 0 ending-index))
-    string))
-
-(defn
-#^{:doc "Converts the given clj file name to a symbol string. For example: \"core.clj\" would get converted into 
-\"core\""}
-  clj-file-to-symbol-string [file-name]
-  (slashes-to-dots (underscores-to-dashes (strip-ending file-name ".clj"))))
-
-(defn
-#^{ :doc "Returns a string for the namespace of the given file in the given directory." }
-  namespace-string-for-file [file-name]
-  (when file-name
-    (str (migrate-namespace-prefix) "." (clj-file-to-symbol-string file-name))))
+    (when-let [namespace-str (find-migration-namespace migration-name)]
+        (File. migrate-directory (.getName (File. (loading-utils/symbol-string-to-clj-file namespace-str)))))))
 
 (defn
 #^{ :doc "Returns the migration namespace for the given migration file." }
   migration-namespace [migration-file]
   (when migration-file
     (namespace-string-for-file (.getName migration-file))))
-  
-(defn
-#^{ :doc "Finds the number of the migration file before the given number" }
-  migration-number-before 
-    ([migration-number] 
-      (if migration-number 
-        (migration-number-before migration-number (all-migration-files))))
-    ([migration-number migration-files]
-      (when migration-number
-        (loop [files migration-files
-               previous-file-number 0]
-          (if (not-empty migration-files)
-            (let [migration-file (first files)
-                  migration-file-number (migration-number-from-file migration-file)]
-              (if (< migration-file-number migration-number)
-                (recur (rest files) migration-file-number)
-                previous-file-number))
-            previous-file-number)))))

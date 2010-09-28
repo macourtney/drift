@@ -7,4 +7,4 @@
   (migration-usage))
 
 (deftest test-create-file-content
-  (is (create-file-content 1 "migrations.001-create-tests" nil nil nil)))
+  (is (create-file-content "migrations.001-create-tests" nil nil nil)))

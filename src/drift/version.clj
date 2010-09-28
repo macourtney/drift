@@ -9,4 +9,5 @@
 (defn
 #^{ :doc "Sets the db version." }
   update-db-version [new-version] 
-  ((:update-version (core/find-config)) new-version))
+  ((:update-version (core/find-config)) new-version)
+  new-version)

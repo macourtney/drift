@@ -2,7 +2,8 @@
   (:use clojure.contrib.test-is
         drift.execute)
   (:require [clojure.contrib.logging :as logging]
-            [config.migrate-config :as config]))
+            [config.migrate-config :as config]
+            [test-helper :as test-helper]))
 
 (deftest test-version-number
   (is (= 0 (version-number 0)))

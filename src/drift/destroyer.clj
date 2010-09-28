@@ -1,7 +1,6 @@
 (ns drift.destroyer
-  (:require [clojure.contrib.duck-streams :as duck-streams]
-            [clojure.contrib.logging :as logging]
-            [drift.builder :as builder]
+  (:import [java.io File])
+  (:require [clojure.contrib.logging :as logging]
             [drift.core :as core]))
 
 (defn

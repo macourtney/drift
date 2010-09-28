@@ -1,6 +1,7 @@
 (ns drift.test-version
   (:use clojure.contrib.test-is
-        drift.version))
+        drift.version)
+  (:require [test-helper :as test-helper]))
 
 (deftest test-current-db-version
   (is (= (current-db-version) 0)))
