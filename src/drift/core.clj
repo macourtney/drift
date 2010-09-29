@@ -117,7 +117,9 @@
 
 (defn
   migration-number-from-namespace [migration-namespace]
-  (Integer/parseInt (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))))
+  (when migration-namespace
+    (when-let [migration-number-str (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))]
+      (Integer/parseInt migration-number-str))))
 
 (defn
 #^{ :doc "Returns all of the migration file names with numbers between low-number and high-number inclusive." }
@@ -133,7 +135,7 @@
   migration-numbers
   ([] (migration-numbers (migration-namespaces)))
   ([migration-namespaces]
-    (map migration-number-from-namespace migration-namespaces)))
+    (filter identity (map migration-number-from-namespace migration-namespaces))))
 
 (defn
 #^{ :doc "Returns the maximum number of all migration files." }
