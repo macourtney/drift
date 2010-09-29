@@ -3,7 +3,7 @@
   (:require [clojure.string :as string]
             [clojure.contrib.logging :as logging]
             [clojure.contrib.seq-utils :as seq-utils]
-            [clojure_util.loading-utils :as loading-utils]))
+            [clojure.tools.loading-utils :as loading-utils]))
 
 (def migrate-dir "migrate")
 

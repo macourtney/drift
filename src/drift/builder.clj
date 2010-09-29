@@ -2,8 +2,8 @@
   (:import [java.io File])
   (:require [clojure.contrib.logging :as logging]
             [clojure.contrib.str-utils :as str-utils]
-            [clojure_util.loading-utils :as loading-utils]
-            [clojure_util.string-utils :as util-string-utils]
+            [clojure.tools.loading-utils :as loading-utils]
+            [clojure.tools.string-utils :as util-string-utils]
             [drift.core :as core]))
 
 (defn 
