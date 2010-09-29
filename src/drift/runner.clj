@@ -36,16 +36,16 @@
   migrate-up-all
   ([] (migrate-up-all (core/migration-namespaces)))
   ([migration-namespaces]
-    (doseq [migration-namespace migration-namespaces]
-      (run-migrate-up migration-namespace))))
+    (when (and migration-namespaces (not-empty migration-namespaces))
+      (reduce max 0 (map run-migrate-up migration-namespaces)))))
 
 (defn
 #^{ :doc "Runs the up function on all of the given migration files." }
   migrate-down-all
   ([] (migrate-down-all (reverse (core/migration-namespaces))))
   ([migration-namespaces]
-    (doseq [migration-namespace migration-namespaces]
-      (run-migrate-down migration-namespace))))
+    (when (and migration-namespaces (not-empty migration-namespaces))
+      (reduce min Integer/MAX_VALUE (map run-migrate-down migration-namespaces)))))
 
 (defn
 #^{ :doc "Migrates the database up from from-version to to-version." }
