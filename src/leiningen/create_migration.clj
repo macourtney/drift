@@ -4,6 +4,6 @@
 (defn create-migration [project & args]
   (lein-compile/eval-in-project project
     `(do
-      (require ~''drift.builder)
-      (drift.builder/create-migration-file ~(first args)))))
+      (require ~''drift.generator)
+      (drift.generator/generate-migration-file ~(first args)))))
 

@@ -35,7 +35,7 @@
 (defn
 #^{ :doc "Creates the migration file from the given migration-name." }
   generate-migration-file 
-    ([migration-name] (generate-migration-file migration-name nil nil nil))
+    ([migration-name] (generate-migration-file migration-name (core/default-ns-content) nil nil))
     ([migration-name ns-content up-content down-content]
       (if migration-name
         (let [migrate-directory (builder/find-or-create-migrate-directory)

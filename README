@@ -8,9 +8,9 @@ appropriate.
 
 To use Drift you'll need to add drift to your Leiningen project. Simply add the following to your project.clj file:
 
-[drift "1.0.0-SNAPSHOT"]
+[drift "1.2.0"]
 
-Note: Currently Drift is not on Clojars. You will need to clone drift and install it locally for the above to work.
+If you want to use the lein commands, you'll need to add the above vector to your :dev-dependencies vector. If you want to access drift code directly in your project, you'll need to add it to your :dependencies vector. You can add drift to both vectors without any problems.
 
 To set your Drift migration directory, simply add a clojure file called "migrate_config.clj" to the directory
 "src/config".
@@ -21,8 +21,8 @@ Your migrate_config.clj file should look something like:
 
  (defn migrate-config []
    { :directory "/test/migrations"
-     :current-db-version current-db-version-fn
-     :update-db-version update-db-version-fn })
+     :current-version current-db-version-fn
+     :update-version update-db-version-fn })
 
 Current-db-version-fn and update-db-version-fn are both function which you must implement to let Drift read and set the
 current db version.
@@ -51,7 +51,7 @@ For example, here is an in memory db version (Note, you do not want to do this):
      :update-db-version memory-update-db-version })
 
 
-Using a table named "schema_migrations" that has one version column with a single value holding the current database version:
+Here is an example database version using a table named "schema_migrations" that has one version column with a single value holding the current database version:
 
 (ns config.migrate-config
   (:require [clojure.contrib.sql :as sql])
@@ -67,11 +67,47 @@ Using a table named "schema_migrations" that has one version column with a singl
   (sql/with-connection DB
     (sql/insert-values :schema_migrations [:version] [version])))
 
+## Initialization
+
+If you need to run some initialization code, add :init to your migrate-config. For example:
+
+(defn migrate-config []
+   { :directory "/test/migrations"
+     :init init
+     :current-db-version memory-current-db-version
+     :update-db-version memory-update-db-version })
+
+The above migrate-config will call the function "init" before any migrations are run. If you pass parameters to "lein migrate", they will be passed along to the init function.
+
+If you want to include a special use or require section in the namespace function of all migration files you can use the :ns-content key.
+
+For example:
+
+(defn migrate-config []
+   { :directory "/test/migrations"
+     :ns-content "\n  (:use database.util)"
+     :current-db-version memory-current-db-version
+     :update-db-version memory-update-db-version })
+
+The above migrate-config will add "\n  (:use database.util)" to the namespace function call at the top of every migration file.
+
 ## Using Leiningen
 
 To migrate to the most recent version:
 
 $ lein migrate
+
+To migrate to a specific version, pass the version as a parameter to migrate. For example, to migrate to version 1:
+
+$ lein migrate -version 1
+
+To undo all migrations and start with a clean database, simply pass 0 as the migration number. For example:
+
+$ lein migrate -version 0
+
+To create a new migration file which you can then edit:
+
+$ lein create-migration <migration name>
 
 ## License
 
