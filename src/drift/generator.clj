@@ -37,6 +37,7 @@
   generate-migration-file 
     ([migration-name] (generate-migration-file migration-name (core/default-ns-content) nil nil))
     ([migration-name ns-content up-content down-content]
+      (core/run-init [])
       (if migration-name
         (let [migrate-directory (builder/find-or-create-migrate-directory)
               migration-file (builder/create-migration-file migrate-directory migration-name)] 
