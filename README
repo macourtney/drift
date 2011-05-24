@@ -43,7 +43,7 @@ For example, here is an in memory db version (Note, you do not want to do this):
    (or @version 0)) 
  
  (defn memory-update-db-version [new-version]
-   (swap! version #(identity %2) new-version)) 
+   (reset! version new-version))
  
  (defn migrate-config []
    { :directory "/test/migrations"
@@ -111,4 +111,4 @@ $ lein create-migration <migration name>
 
 ## License
 
-Copyright © 2009 Matthew Courtney and released under the Apache 2.0 license.
+Copyright ï¿½ 2009 Matthew Courtney and released under the Apache 2.0 license.
