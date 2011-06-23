@@ -40,7 +40,7 @@
       (reduce max 0 (map run-migrate-up migration-namespaces)))))
 
 (defn
-#^{ :doc "Runs the up function on all of the given migration files." }
+#^{ :doc "Runs the down function on all of the given migration files." }
   migrate-down-all
   ([] (migrate-down-all (reverse (core/migration-namespaces))))
   ([migration-namespaces]

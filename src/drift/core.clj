@@ -1,5 +1,6 @@
 (ns drift.core
-  (:import [java.io File])
+  (:import [java.io File]
+           [java.util Comparator])
   (:require [clojure.string :as string]
             [clojure.contrib.logging :as logging]
             [clojure.contrib.seq-utils :as seq-utils]
@@ -124,11 +125,18 @@
 (defn
 #^{ :doc "Returns all of the migration file names with numbers between low-number and high-number inclusive." }
   migration-namespaces-in-range [low-number high-number]
-  (filter 
-    (fn [migration-namespace] 
-      (let [migration-number (migration-number-from-namespace migration-namespace)]
-        (and (>= migration-number low-number) (<= migration-number high-number)))) 
-    (migration-namespaces)))
+  (sort
+    (reify Comparator
+      (compare [this namespace1 namespace2]
+        (if (< low-number high-number)
+          (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
+          (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1))))
+      (equals [this object] (= this object)))
+    (filter 
+      (fn [migration-namespace] 
+        (let [migration-number (migration-number-from-namespace migration-namespace)]
+          (and (>= migration-number low-number) (<= migration-number high-number)))) 
+      (migration-namespaces))))
 
 (defn 
 #^{ :doc "Returns all of the numbers prepended to the migration files." }

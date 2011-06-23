@@ -72,6 +72,9 @@
 (deftest test-migration-namespaces-in-range
   (let [migration-namespaces (migration-namespaces-in-range 0 1)]
     (is (not-empty migration-namespaces)))
+  (let [migration-namespaces (migration-namespaces-in-range 0 2)]
+    (is (not-empty migration-namespaces))
+    (is (= migration-namespaces ["migrations.001-create-tests" "migrations.002-test-update"])))
   (let [migration-namespaces (migration-namespaces-in-range 0 0)]
     (is (empty migration-namespaces))))
 
