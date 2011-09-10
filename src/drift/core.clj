@@ -114,7 +114,7 @@
   migration-namespaces []
   (if-let [migration-namespaces (:migration-namespaces (find-config))]
     (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
-    (map namespace-string-for-file (loading-utils/all-class-path-file-names (migrate-namespace-dir)))))
+    (map namespace-string-for-file (filter #(re-matches #".*\.clj$" %) (loading-utils/all-class-path-file-names (migrate-namespace-dir))))))
 
 (defn
   migration-number-from-namespace [migration-namespace]
