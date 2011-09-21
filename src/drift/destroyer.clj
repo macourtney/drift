@@ -1,6 +1,6 @@
 (ns drift.destroyer
   (:import [java.io File])
-  (:require [clojure.contrib.logging :as logging]
+  (:require [clojure.tools.logging :as logging]
             [drift.core :as core]))
 
 (defn

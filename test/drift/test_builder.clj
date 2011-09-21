@@ -1,5 +1,5 @@
 (ns drift.test-builder
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.builder
         test-helper)
   (:require [drift.core :as core]))

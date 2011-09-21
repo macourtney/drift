@@ -1,6 +1,5 @@
 (ns drift.execute
-  (:require [clojure.contrib.command-line :as command-line]
-            [drift.core :as core]
+  (:require [drift.core :as core]
             [drift.runner :as runner]))
 
 (defn
@@ -24,9 +23,10 @@
     (let [first-arg (first args)]
       (if (= first-arg "-version")
         [(second args) (concat (reverse others) (drop 2 args))]
-        (if-let [more-args (seq (rest args))]
-          (recur more-args (cons first-arg others))
-          [nil (reverse others)])))))
+        (let [new-others (if first-arg (cons first-arg others) others)]
+          (if-let [more-args (seq (rest args))]
+            (recur more-args new-others)
+            [nil (reverse new-others)]))))))
 
 (defn
   run [args]

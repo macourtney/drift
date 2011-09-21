@@ -1,7 +1,6 @@
 (ns drift.builder
   (:import [java.io File])
-  (:require [clojure.contrib.logging :as logging]
-            [clojure.contrib.str-utils :as str-utils]
+  (:require [clojure.tools.logging :as logging]
             [clojure.tools.loading-utils :as loading-utils]
             [clojure.tools.string-utils :as util-string-utils]
             [drift.core :as core]))

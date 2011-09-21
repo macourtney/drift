@@ -1,8 +1,7 @@
 (ns drift.test-execute
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.execute)
-  (:require [clojure.contrib.logging :as logging]
-            [config.migrate-config :as config]
+  (:require [config.migrate-config :as config]
             [test-helper :as test-helper]))
 
 (deftest test-version-number
@@ -27,11 +26,13 @@
   (test-migrated? 0))
 
 (deftest test-find-version-arg
-  (is (= ["0" ()] (find-version-arg ["-version" "0"])))
-  (is (= ["0" '("-other" "args")] (find-version-arg ["-version" "0" "-other" "args"])))
-  (is (= ["0" '("-other" "args")] (find-version-arg ["-other" "args" "-version" "0"])))
-  (is (= ["0" '("-flag")] (find-version-arg ["-flag" "-version" "0"])))
-  (is (= [nil ()] (find-version-arg [])))) 
+  (is (= ["0" []] (find-version-arg ["-version" "0"])))
+  (is (= ["0" ["-other" "args"]] (find-version-arg ["-version" "0" "-other" "args"])))
+  (is (= ["0" ["-other" "args"]] (find-version-arg ["-other" "args" "-version" "0"])))
+  (is (= ["0" ["-flag"]] (find-version-arg ["-flag" "-version" "0"])))
+  (is (= [nil ["-flag"]] (find-version-arg ["-flag"])))
+  (is (= [nil ["-other" "args"]] (find-version-arg ["-other" "args"])))
+  (is (= [nil []] (find-version-arg [])))) 
 
 (deftest test-run
   (compare-and-set! config/init-run? false false)

@@ -1,9 +1,8 @@
 (ns drift.test-core
   (:import [java.io File])
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.core)
-  (:require [clojure.contrib.logging :as logging]
-            [config.migrate-config :as migrate-config]
+  (:require [config.migrate-config :as migrate-config]
             [test-helper :as test-helper]))
 
 (def migration-name "create-tests")

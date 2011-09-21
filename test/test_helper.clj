@@ -2,7 +2,7 @@
   (:import [java.io File]
            [org.apache.log4j ConsoleAppender Level Logger PatternLayout]
            [org.apache.log4j.varia LevelRangeFilter])
-  (:use clojure.contrib.test-is))
+  (:use clojure.test))
 
 (def output-pattern (new PatternLayout "%-5p [%c]: %m%n"))
 

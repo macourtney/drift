@@ -1,5 +1,5 @@
 (ns drift.test-version
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.version)
   (:require [test-helper :as test-helper]))
 

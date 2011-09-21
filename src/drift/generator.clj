@@ -1,7 +1,5 @@
 (ns drift.generator
-  (:require [clojure.contrib.duck-streams :as duck-streams]
-            [clojure.contrib.logging :as logging]
-            [drift.builder :as builder]
+  (:require [drift.builder :as builder]
             [drift.core :as core]))
 
 (defn
@@ -30,7 +28,7 @@
   generate-file-content [migration-file migration-name ns-content up-content down-content]
   (let [migration-namespace (core/migration-namespace migration-file)
         content (create-file-content migration-namespace ns-content up-content down-content)]
-    (duck-streams/spit migration-file content)))
+    (spit migration-file content)))
 
 (defn
 #^{ :doc "Creates the migration file from the given migration-name." }

@@ -1,5 +1,5 @@
 (ns drift.test-generator
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.generator
         test-helper))
 

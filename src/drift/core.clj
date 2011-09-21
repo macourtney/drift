@@ -2,8 +2,7 @@
   (:import [java.io File]
            [java.util Comparator])
   (:require [clojure.string :as string]
-            [clojure.contrib.logging :as logging]
-            [clojure.contrib.seq-utils :as seq-utils]
+            [clojure.tools.logging :as logging]
             [clojure.tools.loading-utils :as loading-utils]))
 
 (def migrate-dir "migrate")
@@ -165,8 +164,8 @@
 
 (defn
   find-migration-namespace [migration-name]
-  (seq-utils/find-first
-    #(re-find (re-pattern (str (migrate-namespace-prefix) "\\.[0-9]+-" migration-name)) %1)
+  (some
+    #(when (re-find (re-pattern (str (migrate-namespace-prefix) "\\.[0-9]+-" migration-name)) %1) %1)
     (map namespace-name-str (migration-namespaces))))
 
 (defn

@@ -1,5 +1,5 @@
 (ns drift.test-destroyer
-  (:use clojure.contrib.test-is
+  (:use clojure.test
         drift.destroyer
         test-helper))
 
