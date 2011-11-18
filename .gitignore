@@ -4,4 +4,6 @@ pom.xml
 .classpath
 lib
 bin
+.lein-failures
+.pmd
 classes
