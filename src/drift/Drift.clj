@@ -4,9 +4,9 @@
             [drift.version :as version])
   (:gen-class
     :methods [[init [java.util.List] Object]
-              [migrate [Integer java.util.List] Void]
-              [currentVersion [] Integer]
-              [maxMigrationNumber [] Integer]]))
+              [migrate [Long java.util.List] Void]
+              [currentVersion [] Long]
+              [maxMigrationNumber [] Long]]))
 
 (defn -init [_ other-args]
   (core/run-init other-args))

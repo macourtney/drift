@@ -7,7 +7,7 @@
 (deftest test-version-number
   (is (= 0 (version-number 0)))
   (is (= 1 (version-number "1")))
-  (is (= Integer/MAX_VALUE (version-number nil))))
+  (is (= Long/MAX_VALUE (version-number nil))))
 
 (defn
   test-migrated? [version]

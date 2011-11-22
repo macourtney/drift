@@ -3,13 +3,13 @@
             [drift.runner :as runner]))
 
 (defn
-#^{:doc "Gets the version number from the passed in version parameter. If the given version string is nil, then this method returns Integer.MAX_VALUE. If the version parameter is invalid, then this method prints an error and returns nil."}
+#^{:doc "Gets the version number from the passed in version parameter. If the given version string is nil, then this method returns Long/MAX_VALUE. If the version parameter is invalid, then this method prints an error and returns nil."}
   version-number [version]
   (if version
     (if (string? version)
-      (Integer/parseInt version)
+      (Long/parseLong version)
       version)
-    Integer/MAX_VALUE))
+    Long/MAX_VALUE))
 
 (defn
   migrate [version remaining-args]

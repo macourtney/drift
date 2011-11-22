@@ -1,4 +1,5 @@
-(ns config.migrate-config)
+(ns config.migrate-config
+  (:require [drift.builder :as builder]))
 
 (def version (atom nil))
 (def init-run? (atom false)) 
@@ -17,4 +18,5 @@
     :current-version memory-current-version
     :update-version memory-update-version
     :init init
-    :ns-content "\n  (:use clojure.contrib.sql)" })
+    :ns-content "\n  (:use clojure.contrib.sql)"
+    :migration-number-generator builder/incremental-migration-number-generator })

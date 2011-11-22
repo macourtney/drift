@@ -81,11 +81,19 @@
   (let [migration-numbers (migration-numbers)]
     (is (not-empty migration-numbers))
     (is (number? (first migration-numbers)))
-    (is (= [1 2]  migration-numbers))))
+    (is (= [1 2]  migration-numbers)))
+  (let [migration-numbers (migration-numbers ["migrations.001-test" "migrations.002-test" "migrations.005-test"])]
+    (is (not-empty migration-numbers))
+    (is (number? (first migration-numbers)))
+    (is (= [1 2 5]  migration-numbers))))
 
 (deftest test-max-migration-number
   (let [max-number (max-migration-number)]
-    (is (= max-number 2))))
+    (is (= max-number 2)))
+  (let [max-number (max-migration-number (migration-namespaces))]
+    (is (= max-number 2)))
+  (let [max-number (max-migration-number ["migrations.001-test" "migrations.002-test" "migrations.005-test"])]
+    (is (= max-number 5))))
 
 (deftest test-find-next-migrate-number
   (is (= (find-next-migrate-number) (inc (max-migration-number)))))

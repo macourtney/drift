@@ -113,13 +113,15 @@
   migration-namespaces []
   (if-let [migration-namespaces (:migration-namespaces (find-config))]
     (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
-    (map namespace-string-for-file (filter #(re-matches #".*\.clj$" %) (loading-utils/all-class-path-file-names (migrate-namespace-dir))))))
+    (map namespace-string-for-file
+      (filter #(re-matches #".*\.clj$" %)
+        (loading-utils/all-class-path-file-names (migrate-namespace-dir))))))
 
 (defn
   migration-number-from-namespace [migration-namespace]
   (when migration-namespace
     (when-let [migration-number-str (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))]
-      (Integer/parseInt migration-number-str))))
+      (Long/parseLong migration-number-str))))
 
 (defn
 #^{ :doc "Returns all of the migration file names with numbers between low-number and high-number inclusive." }
@@ -144,10 +146,10 @@
   ([migration-namespaces]
     (filter identity (map migration-number-from-namespace migration-namespaces))))
 
-(defn
-#^{ :doc "Returns the maximum number of all migration files." }
-  max-migration-number []
-  (apply max 0 (migration-numbers)))
+(defn max-migration-number
+  "Returns the maximum number of all migration files."
+  ([migration-namespaces] (reduce max 0 (migration-numbers migration-namespaces)))
+  ([] (reduce max 0 (migration-numbers))))
 
 (defn 
 #^{ :doc "Returns the next number to use for a migration file." }
