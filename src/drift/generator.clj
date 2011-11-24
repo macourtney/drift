@@ -13,14 +13,14 @@
   (let [migration-number (core/migration-number-from-namespace migration-namespace)]
     (str "(ns " migration-namespace (or ns-content (core/default-ns-content))  ")
 
-(defn
-#^{:doc \"Migrates the database up to version " migration-number ".\"}
-  up []
+(defn up
+  \"Migrates the database up to version " migration-number ".\"
+  []
   " (or up-content (str "(println \"" migration-namespace " up...\")"))")
   
-(defn
-#^{:doc \"Migrates the database down from version " migration-number ".\"}
-  down []
+(defn down
+  \"Migrates the database down from version " migration-number ".\"
+  []
   " (or down-content (str "(println \"" migration-namespace " down...\")"))")")))
 
 (defn
