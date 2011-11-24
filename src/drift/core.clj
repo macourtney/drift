@@ -5,7 +5,8 @@
             [clojure.tools.logging :as logging]
             [clojure.tools.loading-utils :as loading-utils]))
 
-(def migrate-dir "migrate")
+(def migrate-dir "/src/migrate")
+(def src-dir "/src")
 
 (def config-ns-symbol 'config.migrate-config)
 
@@ -43,6 +44,10 @@
   (or (:directory (find-config)) migrate-dir))
 
 (defn
+  find-src-dir []
+  (or (:src (find-config)) src-dir))
+
+(defn
 #^{:doc "Returns the directory where Conjure is running from."}
   user-directory []
   (new File (.getProperty (System/getProperties) "user.dir")))
@@ -77,9 +82,7 @@
   migrate-namespace-dir
   ([] (migrate-namespace-dir (find-migrate-dir-name)))
   ([migrate-dir-name]
-    (if-let [file-separator-index (file-separator-index migrate-dir-name)]
-      (.substring migrate-dir-name (inc file-separator-index))
-       migrate-dir-name)))
+    (.substring migrate-dir-name (count (find-src-dir)))))
 
 (defn
 #^{ :doc "Returns the namespace prefix for the migrate directory name." }
