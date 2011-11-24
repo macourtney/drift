@@ -151,6 +151,42 @@ To create a new migration file which you can then edit:
 $ lein create-migration <migration name>
 ```
 
+## Calling Drift From Java
+
+You can call Drift from any java application. Simply create an instance of the Drift object:
+
+```java
+Drift myDrift = new Drift();
+```
+
+After you create an instance of the Drift object, you must initialize it, or your Drift migrations may run in a bad state.
+
+```java
+myDrift.init(Collections.EMPTY_LIST);
+```
+
+The one argument to init is a list which will be passed on to the init function set in your migrate_config. In the above example, the init function does not require any parameters, so an empty list is passed in.
+
+You can get the current database version with:
+
+```java
+myDrift.currentVersion();
+```
+
+You can get the maximum migration number with:
+
+```java
+myDrift.maxMigrationNumber();
+```
+
+Finally, to run the migrations, you can use the function `migrate`:
+
+```java
+myDrift.migrate(myDrift.maxMigrationNumber(), Collections.EMPTY_LIST);
+```
+
+The `migrate` function takes the migration number to migrate to, and a parameter list which is passed onto the init function. In the above example, we tell Drift to migrate to the maximum version and pass no arguments since our init function does not need any.
+
 ## License
 
 Copyright (C) 2009 Matthew Courtney and released under the Apache 2.0
