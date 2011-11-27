@@ -23,10 +23,10 @@
     (when-let [migrate-config-fn (ns-resolve migrate-config-namespace 'migrate-config)]
       (migrate-config-fn))))
 
-(defn
-#^{ :doc "Finds the init function from the config. The init function should be run before each migration." }
-  find-init-fn []
-  (:init (find-config)))
+(defn find-init-fn
+  "Finds the init function from the config. The init function should be run before each migration."
+  ([] (find-init-fn (find-config)))
+  ([config] (get config :init)))
 
 (defn
 #^{ :doc "Runs the init function with the given args." }
@@ -34,18 +34,31 @@
   (when-let [init-fn (find-init-fn)]
     (init-fn args)))
 
-(defn
-  default-ns-content []
-  (:ns-content (find-config)))
+(defn default-ns-content
+  "Returns the default namespace content if any from the config map."
+  ([] (default-ns-content (find-config)))
+  ([config] (get config :ns-content)))
+
+(defn find-migrate-dir-name
+  "Finds the migrate directory name."
+  ([] (find-migrate-dir-name (find-config)))
+  ([config] (or (get config :directory) migrate-dir)))
 
 (defn
-#^{ :doc "Finds the migrate directory name." }
-  find-migrate-dir-name []
-  (or (:directory (find-config)) migrate-dir))
+  file-separator-index [path-str]
+  (when path-str
+    (let [min-args (filter #(> % -1) [(.indexOf path-str "/" 1) (.indexOf path-str "\\" 1)])]
+      (when (not-empty min-args)
+        (apply min min-args)))))
 
-(defn
-  find-src-dir []
-  (or (:src (find-config)) src-dir))
+(defn find-src-dir
+  "Finds the source directory. If the source directory is not listed in the config map, then this function attempts to
+generate the source directory from the first directory in the migrate directory path."
+  ([] (find-src-dir (find-config)))
+  ([config]
+    (or (get config :src)
+      (let [migrate-directory-name (find-migrate-dir-name config)]
+        (.substring migrate-directory-name 0 (inc (file-separator-index migrate-directory-name)))))))
 
 (defn
 #^{:doc "Returns the directory where Conjure is running from."}
@@ -72,17 +85,11 @@
     (find-directory user-directory migrate-dir-name)))
 
 (defn
-  file-separator-index [path-str]
-  (when path-str
-    (let [min-args (filter #(> % -1) [(.indexOf path-str "/" 1) (.indexOf path-str "\\" 1)])]
-      (when (not-empty min-args)
-        (apply min min-args)))))
-
-(defn
   migrate-namespace-dir
   ([] (migrate-namespace-dir (find-migrate-dir-name)))
   ([migrate-dir-name]
-    (.substring migrate-dir-name (count (find-src-dir)))))
+    (when migrate-dir-name
+      (.substring migrate-dir-name (count (find-src-dir))))))
 
 (defn
 #^{ :doc "Returns the namespace prefix for the migrate directory name." }
@@ -93,7 +100,7 @@
 
 (defn
   migrate-namespace-prefix []
-  (or (:namespace-prefix (find-config)) (migrate-namespace-prefix-from-directory)))
+  (or (get (find-config) :namespace-prefix) (migrate-namespace-prefix-from-directory)))
 
 (defn
 #^{ :doc "Returns a string for the namespace of the given file in the given directory." }
@@ -114,7 +121,7 @@
 
 (defn
   migration-namespaces []
-  (if-let [migration-namespaces (:migration-namespaces (find-config))]
+  (if-let [migration-namespaces (get (find-config) :migration-namespaces)]
     (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
     (map namespace-string-for-file
       (filter #(re-matches #".*\.clj$" %)

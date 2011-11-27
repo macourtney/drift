@@ -2,7 +2,8 @@
   (:use clojure.test
         drift.builder
         test-helper)
-  (:require [drift.core :as core]))
+  (:require [drift.core :as core]
+            [clojure.tools.logging :as logging]))
 
 (deftest test-find-or-create-migrate-directory
   (let [migrate-directory (find-or-create-migrate-directory (core/migrate-directory))]
