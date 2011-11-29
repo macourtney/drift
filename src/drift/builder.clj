@@ -27,7 +27,7 @@
   (.format (SimpleDateFormat. "yyyyMMddHHmmss") (new Date)))
 
 (defn migration-number-generator-fn []
-  (or (:migration-number-generator (core/find-config)) timestamp-migration-number-generator))
+  (or (get (core/find-config) :migration-number-generator) timestamp-migration-number-generator))
 
 (defn migration-number []
   ((migration-number-generator-fn)))

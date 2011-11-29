@@ -15,7 +15,7 @@
   (execute/migrate version other-args))
 
 (defn -currentVersion [_]
-  (version/current-db-version))
+  (long (version/current-db-version)))
 
 (defn -maxMigrationNumber [_]
-  (core/max-migration-number))
+  (long (core/max-migration-number)))

@@ -71,7 +71,6 @@ version number, then this function causes a roll back." }
   update-to-version [version-number]
   (if version-number
     (let [db-version (version/current-db-version)]
-      (logging/info (str "version-number: " version-number))
       (logging/info (str "Current database version: " db-version))
       (let [version-number-min (min (max version-number 0) (core/max-migration-number))]
         (logging/info (str "Updating to version: " version-number-min))
