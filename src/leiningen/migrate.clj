@@ -1,4 +1,5 @@
 (ns leiningen.migrate
+  "Run drift migration scripts."
   (require [leiningen.compile :as lein-compile]))
 
 (defn migrate [project & args]

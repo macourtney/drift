@@ -1,4 +1,5 @@
 (ns leiningen.create-migration
+  "Create a new versioned migration script."
   (:require [leiningen.compile :as lein-compile]))
 
 (defn create-migration [project & args]
