@@ -1,7 +1,9 @@
 (ns leiningen.migrate
-  (require [leiningen.compile :as lein-compile]))
+  "Run drift migration scripts."
+  (use [leiningen.core.eval :only (eval-in-project)]))
 
 (defn migrate [project & args]
-  (lein-compile/eval-in-project project
+  "Run migration scripts."
+  (eval-in-project project
     `(drift.execute/run '~args)
-    nil nil '(require 'drift.execute)))
+    '(require 'drift.execute)))
