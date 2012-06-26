@@ -23,6 +23,8 @@ code directly in your project, you'll need to add it to your
 `:dependencies` vector. You can add drift to both vectors without any
 problems.
 
+If you're using drift with lein2, you'll need to add it the :plugins list in the project.clj file.
+
 To set your Drift migration directory, simply add a clojure file
 called "migrate_config.clj" to the directory "src/config".
 
