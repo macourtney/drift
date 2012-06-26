@@ -1,8 +1,10 @@
 (ns leiningen.create-migration
-  (:require [leiningen.compile :as lein-compile]))
+  "Create a new versioned migration script."
+  (use [leiningen.core.eval :only (eval-in-project)]))
 
 (defn create-migration [project & args]
-  (lein-compile/eval-in-project project
+  "Create a new migration file."
+  (eval-in-project project
     `(drift.generator/generate-migration-file ~(first args))
-    nil nil '(require 'drift.generator)))
+    '(require 'drift.generator)))
 
