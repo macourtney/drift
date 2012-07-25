@@ -65,7 +65,8 @@
 (deftest test-migration-namespaces
   (let [migration-namespaces (migration-namespaces)]
     (is (= 2 (count migration-namespaces)))
-    (is (= ["migrations.001-create-tests" "migrations.002-test-update"] (map namespace-name-str migration-namespaces)))))
+    (is (= ["migrations.001-create-tests" "migrations.002-test-update"] (map namespace-name-str migration-namespaces))))
+  (is (= ["migrations.002-test-update" "migrations.001-create-tests"] (map namespace-name-str (migration-namespaces false)))))
 
 (deftest test-migration-number-from-namespace
   (is (= 1 (migration-number-from-namespace "migrations.001-create-tests")))
@@ -79,7 +80,8 @@
 
 (deftest test-migration-namespaces-in-range
   (let [migration-namespaces (migration-namespaces-in-range 0 1)]
-    (is (not-empty migration-namespaces)))
+    (is (not-empty migration-namespaces))
+    (is (= migration-namespaces ["migrations.001-create-tests"])))
   (let [migration-namespaces (migration-namespaces-in-range 0 2)]
     (is (not-empty migration-namespaces))
     (is (= migration-namespaces ["migrations.001-create-tests" "migrations.002-test-update"])))

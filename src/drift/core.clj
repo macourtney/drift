@@ -120,34 +120,51 @@ generate the source directory from the first directory in the migrate directory 
   (.startsWith (namespace-name-str migration-namespace) (str (migrate-namespace-prefix) ".")))
 
 (defn
-  migration-namespaces []
-  (if-let [migration-namespaces (get (find-config) :migration-namespaces)]
-    (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))
-    (map namespace-string-for-file
-      (filter #(re-matches #".*\.clj$" %)
-        (loading-utils/all-class-path-file-names (migrate-namespace-dir))))))
-
-(defn
   migration-number-from-namespace [migration-namespace]
   (when migration-namespace
     (when-let [migration-number-str (re-find #"^[0-9]+" (last (string/split (namespace-name-str migration-namespace) #"\.")))]
       (Long/parseLong migration-number-str))))
 
+(defn migration-compartor [ascending?]
+  (reify Comparator
+    (compare [this namespace1 namespace2]
+      (if ascending?
+        (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
+        (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1))))
+    (equals [this object] (= this object))))
+
+(defn user-migration-namespaces []
+  (when-let [migration-namespaces (get (find-config) :migration-namespaces)]
+    (migration-namespaces (find-migrate-dir-name) (migrate-namespace-prefix))))
+
+(defn default-migration-namespaces []
+  (map namespace-string-for-file
+       (filter #(re-matches #".*\.clj$" %)
+               (loading-utils/all-class-path-file-names (migrate-namespace-dir)))))
+
+(defn sort-migration-namespaces
+  ([migration-namespaces] (sort-migration-namespaces migration-namespaces true))
+  ([migration-namespaces ascending?]
+    (sort (migration-compartor ascending?) migration-namespaces)))
+
+(defn unsorted-migration-namespaces []
+  (set (or (user-migration-namespaces) (default-migration-namespaces))))
+
+(defn migration-namespaces
+  ([] (migration-namespaces true))
+  ([ascending?]
+    (sort-migration-namespaces (unsorted-migration-namespaces) ascending?)))
+
 (defn
 #^{ :doc "Returns all of the migration file names with numbers between low-number and high-number inclusive." }
   migration-namespaces-in-range [low-number high-number]
-  (sort
-    (reify Comparator
-      (compare [this namespace1 namespace2]
-        (if (< low-number high-number)
-          (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
-          (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1))))
-      (equals [this object] (= this object)))
+  (sort-migration-namespaces
     (filter 
       (fn [migration-namespace] 
         (let [migration-number (migration-number-from-namespace migration-namespace)]
           (and (>= migration-number low-number) (<= migration-number high-number)))) 
-      (migration-namespaces))))
+      (unsorted-migration-namespaces))
+    (< low-number high-number)))
 
 (defn 
 #^{ :doc "Returns all of the numbers prepended to the migration files." }
