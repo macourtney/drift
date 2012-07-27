@@ -67,8 +67,8 @@ do this):
  
  (defn migrate-config []
    { :directory "/test/migrations"
-     :current-db-version memory-current-db-version
-     :update-db-version memory-update-db-version })
+     :current-version memory-current-db-version
+     :update-version memory-update-db-version })
 ```
 
 Here is an example database version using a table named
@@ -100,8 +100,8 @@ migrate-config. For example:
 (defn migrate-config []
    { :directory "/test/migrations"
      :init init
-     :current-db-version memory-current-db-version
-     :update-db-version memory-update-db-version })
+     :current-version memory-current-db-version
+     :update-version memory-update-db-version })
 ```
 
 The above `migrate-config` will call the function "init" before any
@@ -118,8 +118,8 @@ For example:
 (defn migrate-config []
    { :directory "/test/migrations"
      :ns-content "\n  (:use database.util)"
-     :current-db-version memory-current-db-version
-     :update-db-version memory-update-db-version })
+     :current-version memory-current-db-version
+     :update-version memory-update-db-version })
 ```
 
 The above `migrate-config` will add "`\n (:use database.util)`" to the
