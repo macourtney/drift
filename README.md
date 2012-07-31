@@ -34,12 +34,12 @@ Your migrate_config.clj file should look something like:
  (ns config.migrate-config)
 
  (defn migrate-config []
-   { :directory "/test/migrations"
+   { :directory "/src/migrations"
      :current-version current-db-version-fn
      :update-version update-db-version-fn })
 ```
 
-`directory` must be a directory under src.
+`directory` must be a directory included in the classpath. Most likely you want your migrations somewhere under src.
 
 `current-db-version-fn` and `update-db-version-fn` are both functions
 which you must implement to let Drift read and set the current db
