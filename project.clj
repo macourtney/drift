@@ -1,4 +1,4 @@
-(defproject drift "1.4.4"
+(defproject drift "1.4.5-SNAPSHOT"
   :description "Drift is a rails like migration framework for Clojure."
   :dependencies [[clojure-tools "1.1.1"]
                  [org.clojure/clojure "1.2.1"]
