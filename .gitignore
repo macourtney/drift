@@ -8,3 +8,4 @@ bin
 .pmd
 classes
 .lein-deps-sum
+target/
