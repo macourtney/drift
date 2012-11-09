@@ -85,8 +85,8 @@ holding the current database version:
 (defn db-version []
   (sql/with-connection DB
     (sql/with-query-results res 
-      ["select version from schema_migrations limit 1"]
-      (:version (first res)))))
+      ["select version from schema_migrations"]
+      (or (:version (last res)) 0))))
 
 (defn update-db-version [version]
   (sql/with-connection DB
