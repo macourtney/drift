@@ -7,7 +7,7 @@
   migration-usage []
   (println "You must supply a migration name (Like migration-name).")
   (println "Usage: lein.bat migration <migration name>"))
-  
+
 (defn
   create-file-content [migration-namespace ns-content up-content down-content]
   (let [migration-number (core/migration-number-from-namespace migration-namespace)]
@@ -17,7 +17,7 @@
   \"Migrates the database up to version " migration-number ".\"
   []
   " (or up-content (str "(println \"" migration-namespace " up...\")"))")
-  
+
 (defn down
   \"Migrates the database down from version " migration-number ".\"
   []
