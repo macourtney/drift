@@ -1,6 +1,7 @@
 (ns drift.generator
   (:require [drift.builder :as builder]
-            [drift.core :as core]))
+            [drift.core :as core]
+            [drift.config :as config]))
 
 (defn
 #^{ :doc "Prints out how to use the generate migration command." }
@@ -11,7 +12,7 @@
 (defn
   create-file-content [migration-namespace ns-content up-content down-content]
   (let [migration-number (core/migration-number-from-namespace migration-namespace)]
-    (str "(ns " migration-namespace (or ns-content (core/default-ns-content))  ")
+    (str "(ns " migration-namespace (or ns-content (config/default-ns-content))  ")
 
 (defn up
   \"Migrates the database up to version " migration-number ".\"
@@ -33,7 +34,7 @@
 (defn
 #^{ :doc "Creates the migration file from the given migration-name." }
   generate-migration-file 
-    ([migration-name] (generate-migration-file migration-name (core/default-ns-content) nil nil))
+    ([migration-name] (generate-migration-file migration-name (config/default-ns-content) nil nil))
     ([migration-name ns-content up-content down-content]
       (core/run-init [])
       (if migration-name

@@ -2,36 +2,9 @@
   (:import [java.io File])
   (:use clojure.test
         drift.core)
-  (:require [config.migrate-config :as migrate-config]
-            [test-helper :as test-helper]))
+  (:require [test-helper :as test-helper]))
 
 (def migration-name "create-tests")
-
-(deftest test-find-config-namespace
-  (is (find-config-namespace)))
-
-(deftest test-find-config
-  (let [config-map (find-config)]
-    (is config-map)
-    (is (map? config-map))))
-
-(deftest test-find-init-fn
-  (is (= migrate-config/init (find-init-fn)))
-  (is (= migrate-config/init (find-init-fn (find-config))))
-  (is (nil? (find-init-fn {}))))
-
-(deftest test-default-ns-content
-  (is (= "\n  (:use clojure.contrib.sql)" (default-ns-content)))
-  (is (= "\n  (:use clojure.contrib.sql)" (default-ns-content (find-config))))
-  (is (nil? (default-ns-content {}))))
-
-(deftest test-find-migrate-dir-name
-  (let [migrate-dir-name (find-migrate-dir-name)]
-    (is migrate-dir-name)
-    (is (string? migrate-dir-name))
-    (is (= "/test/migrations" migrate-dir-name)))
-  (is (= "/test/migrations" (find-migrate-dir-name (find-config))))
-  (is (= migrate-dir (find-migrate-dir-name {}))))
 
 (deftest test-migrate-directory
   (let [migrate-dir (migrate-directory)]
@@ -42,19 +15,6 @@
   (let [migrate-dir (find-migrate-directory)]
     (is migrate-dir)
     (is (instance? File migrate-dir))))
-
-(deftest test-find-src-dir
-  (is (= "/test/" (find-src-dir)))
-  (is (= "/test/" (find-src-dir (find-config))))
-  (is (= "/src/" (find-src-dir { :src "/src/" } ))))
-
-(deftest test-file-separator-index
-  (is (= 5 (file-separator-index "/test/migrations")))
-  (is (= 4 (file-separator-index "test/migrations")))
-  (is (= 5 (file-separator-index "\\test\\migrations")))
-  (is (= 4 (file-separator-index "test\\migrations")))
-  (is (nil? (file-separator-index "migrations")))
-  (is (nil? (file-separator-index nil))))
 
 (deftest test-migrate-namespace-prefix-from-directory
   (is (= "migrations" (migrate-namespace-prefix-from-directory)))
