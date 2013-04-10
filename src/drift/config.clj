@@ -1,7 +1,7 @@
 (ns drift.config
   (:require [clojure.string :as string]))
 
-(declare find-migrate-dir-name outer-dir-in-path find-config)
+(declare find-migrate-dir-name outer-dir-in-path find-config missing-param)
 
 (def config-ns-symbol 'config.migrate-config)
 
@@ -20,11 +20,16 @@
   {:directory (constantly "/src/migrate")
    :src #(-> % find-migrate-dir-name outer-dir-in-path)})
 
+(def required-params
+  #{:current-version :update-version})
+
 (defn- get-param
   ([name] (get-param name (find-config)))
   ([name config]
    (or (get config name)
-       (when-let [default-fn (defaults name)] (default-fn config)))))
+       (when-let [default-fn (defaults name)] (default-fn config))
+       (if (contains? required-params name)
+         (missing-param name)))))
 
 (doseq [[fn-name param-name] (seq accessors)]
   (intern *ns* fn-name #(apply get-param param-name %&)))
@@ -37,6 +42,10 @@
   (when-let [migrate-config-namespace (find-config-namespace)]
     (when-let [migrate-config-fn (ns-resolve migrate-config-namespace 'migrate-config)]
       (migrate-config-fn))))
+
+(defn- missing-param [param]
+  (throw (java.lang.NullPointerException.
+           (str "Missing configuration parameter in migrate-config: " param))))
 
 (def ^:private separators #{"/" "\\"})
 

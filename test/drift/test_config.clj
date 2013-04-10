@@ -12,6 +12,20 @@
     (is config-map)
     (is (map? config-map))))
 
+(deftest test-current-version-fn
+  (is (= println (current-version-fn {:current-version println })))
+  (is (= ((migrate-config/migrate-config) :current-version) (current-version-fn)))
+  (is (thrown-with-msg? java.lang.NullPointerException
+                        #"Missing .* :current-version"
+                        (current-version-fn {}))))
+
+(deftest test-update-version-fn
+  (is (= println (update-version-fn {:update-version println })))
+  (is (= ((migrate-config/migrate-config) :update-version) (update-version-fn)))
+  (is (thrown-with-msg? java.lang.NullPointerException
+                        #"Missing .* :update-version"
+                        (update-version-fn {}))))
+
 (deftest test-find-init-fn
   (is (= migrate-config/init (find-init-fn)))
   (is (= migrate-config/init (find-init-fn (find-config))))
