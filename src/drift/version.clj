@@ -1,13 +1,13 @@
 (ns drift.version
-  (:require [drift.core :as core]))
+  (:require [drift.config :as config]))
 
 (defn
 #^{ :doc "Returns the current db version." }
   current-db-version [] 
-  ((get (core/find-config) :current-version)))
+  ((config/current-version-fn)))
 
 (defn
 #^{ :doc "Sets the db version." }
   update-db-version [new-version] 
-  ((get (core/find-config) :update-version) new-version)
+  ((config/update-version-fn) new-version)
   new-version)
