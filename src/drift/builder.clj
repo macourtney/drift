@@ -5,7 +5,8 @@
   (:require [clojure.tools.logging :as logging]
             [clojure.tools.loading-utils :as loading-utils]
             [clojure.tools.string-utils :as util-string-utils]
-            [drift.core :as core]))
+            [drift.core :as core]
+            [drift.config :as config]))
 
 (defn 
 #^{ :doc "Finds or creates if missing, the migrate directory in the given db directory." }
@@ -27,7 +28,7 @@
   (.format (SimpleDateFormat. "yyyyMMddHHmmss") (new Date)))
 
 (defn migration-number-generator-fn []
-  (or (get (core/find-config) :migration-number-generator) timestamp-migration-number-generator))
+  (or (config/migration-number-generator) timestamp-migration-number-generator))
 
 (defn migration-number []
   ((migration-number-generator-fn)))
