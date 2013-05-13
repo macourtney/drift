@@ -1,5 +1,7 @@
 (ns drift.execute
-  (:require [drift.core :as core]
+  (:require [drift.args :as args]
+            [drift.config :as config]
+            [drift.core :as core]
             [drift.runner :as runner]))
 
 (defn
@@ -13,22 +15,13 @@
 
 (defn
   migrate [version remaining-args]
-  (core/run-init remaining-args)
-  (runner/update-to-version (version-number version)))
-
-(defn
-  find-version-arg 
-  ([args] (find-version-arg args []))
-  ([args others]
-    (let [first-arg (first args)]
-      (if (= first-arg "-version")
-        [(second args) (concat (reverse others) (drop 2 args))]
-        (let [new-others (if first-arg (cons first-arg others) others)]
-          (if-let [more-args (seq (rest args))]
-            (recur more-args new-others)
-            [nil (reverse new-others)]))))))
+  (core/with-init-config remaining-args
+    (fn []
+      (runner/update-to-version (version-number version)))))
 
 (defn
   run [args]
-  (let [[version remaining] (find-version-arg args)]
-    (migrate version remaining)))
+  (let [[opts remaining] (args/parse-migrate-args args)]
+    (config/with-config-fn-symbol (:config opts)
+      (fn []
+        (migrate (:version opts) remaining)))))

@@ -12,6 +12,16 @@
   (when-let [init-fn (config/find-init-fn)]
     (init-fn args)))
 
+(defn with-init-config
+  "run the init fn, merge results into config, then call the next function with that config
+   bound to drift.config/*config-map*"
+  [args f]
+  (let [init-fn (config/find-init-fn)
+        init-config (if init-fn (init-fn args))]
+    (config/with-config-map
+      (merge (config/find-config) (if (map? init-config) init-config))
+      f)))
+
 (defn
 #^{:doc "Returns the directory where Conjure is running from."}
   user-directory []
