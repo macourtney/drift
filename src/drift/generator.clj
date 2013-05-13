@@ -1,5 +1,6 @@
 (ns drift.generator
-  (:require [drift.builder :as builder]
+  (:require [drift.args :as args]
+            [drift.builder :as builder]
             [drift.core :as core]
             [drift.config :as config]))
 
@@ -42,3 +43,13 @@
               migration-file (builder/create-migration-file migrate-directory migration-name)] 
           (generate-file-content migration-file migration-name ns-content up-content down-content))
         (migration-usage))))
+
+(defn generate-migration-file-cmdline
+  "parse command-line args from lein, set up any custom config,
+   and invoke generate-migration-file"
+  [args]
+  (let [[opts remaining] (args/parse-create-migration-args args)
+        migration-name (first remaining)]
+    (config/with-config-fn-symbol (:config opts)
+      (fn []
+        (generate-migration-file migration-name)))))

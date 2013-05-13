@@ -3,7 +3,17 @@
 
 (declare find-migrate-dir-name outer-dir-in-path find-config missing-param)
 
-(def config-ns-symbol 'config.migrate-config)
+(def default-config-fn-symbol 'config.migrate-config/migrate-config)
+(def ^:dynamic *config-fn-symbol* default-config-fn-symbol)
+(def ^:dynamic *config-map* nil)
+
+(defn with-config-fn-symbol
+  [config-fn-symbol f]
+  (with-bindings* {#'*config-fn-symbol* (or config-fn-symbol default-config-fn-symbol)} f))
+
+(defn with-config-map
+  [config-map f]
+  (with-bindings* {#'*config-map* config-map} f))
 
 (def accessors
   {'current-version-fn :current-version
@@ -24,7 +34,7 @@
   #{:current-version :update-version})
 
 (defn- get-param
-  ([name] (get-param name (find-config)))
+  ([name] (get-param name (or *config-map* (find-config))))
   ([name config]
    (or (get config name)
        (when-let [default-fn (defaults name)] (default-fn config))
@@ -35,13 +45,14 @@
   (intern *ns* fn-name #(apply get-param param-name %&)))
 
 (defn find-config-namespace []
-  (require config-ns-symbol)
-  (find-ns config-ns-symbol))
+  (require (symbol (namespace *config-fn-symbol*)))
+  (find-ns (symbol (namespace *config-fn-symbol*))))
 
 (defn find-config []
   (when-let [migrate-config-namespace (find-config-namespace)]
-    (when-let [migrate-config-fn (ns-resolve migrate-config-namespace 'migrate-config)]
-      (migrate-config-fn))))
+    (if-let [migrate-config-fn (ns-resolve migrate-config-namespace (symbol (name *config-fn-symbol*)))]
+      (migrate-config-fn)
+      (throw (RuntimeException. (str "can't find config function: " *config-fn-symbol*))))))
 
 (defn- missing-param [param]
   (throw (java.lang.NullPointerException.

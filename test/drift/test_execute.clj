@@ -25,15 +25,6 @@
   (migrate 0 [])
   (test-migrated? 0))
 
-(deftest test-find-version-arg
-  (is (= ["0" []] (find-version-arg ["-version" "0"])))
-  (is (= ["0" ["-other" "args"]] (find-version-arg ["-version" "0" "-other" "args"])))
-  (is (= ["0" ["-other" "args"]] (find-version-arg ["-other" "args" "-version" "0"])))
-  (is (= ["0" ["-flag"]] (find-version-arg ["-flag" "-version" "0"])))
-  (is (= [nil ["-flag"]] (find-version-arg ["-flag"])))
-  (is (= [nil ["-other" "args"]] (find-version-arg ["-other" "args"])))
-  (is (= [nil []] (find-version-arg [])))) 
-
 (deftest test-run
   (compare-and-set! config/init-run? false false)
   (run [])
@@ -44,3 +35,19 @@
   (test-migrated? 1)
   (run ["-other" "args" "-version" "0"])
   (test-migrated? 0))
+
+(deftest test-run-custom-config
+  (with-redefs [drift.execute/migrate
+                (fn [version remaining-args]
+                  (is (= version "1234"))
+                  (is (= drift.config/*config-fn-symbol* 'foo.bar/baz))
+                  (is (= remaining-args ["bloop" "blargh"])))]
+    (run ["-version" "1234" "bloop" "-c" "foo.bar/baz" "blargh"])))
+
+(deftest test-run-dynamic-config
+  (with-redefs [drift.runner/update-to-version
+                (fn [version]
+                  (is (= version 1234))
+                  (is (= 42 (:more-config drift.config/*config-map*))))]
+
+    (run ["-version" "1234" "bloop" "-c" "config.dynamic-config/config" "blargh"])))
