@@ -10,10 +10,10 @@
   "given a matched option and whatever is after it in the arg list, remove the option
    and return [{opt-key opt-value} remaining-args]"
   [[switch val & rest :as args] spec]
-  (if (and switch val)
-    [{(:key spec) val} rest]
-    [{} args]))
-
+  (let [parser (or (:parser spec) identity)]
+    (if (and switch val)
+      [{(:key spec) (parser val)} rest]
+      [{} args])))
 
 (defn parse-args
   "do a partial parse of args... removing only options we know about and leaving everything else to
@@ -31,7 +31,8 @@
   [{:key :version
     :matcher #{"-v" "-version" "--version"}}
    {:key :config
-    :matcher #{"-c" "-config" "--config"}}])
+    :matcher #{"-c" "-config" "--config"}
+    :parser symbol}])
 
 (defn parse-migrate-args
   [args]
@@ -39,7 +40,8 @@
 
 (def create-migration-arg-specs
   [{:key :config
-    :matcher #{"-c" "-config" "--config"}}])
+    :matcher #{"-c" "-config" "--config"}
+    :parser symbol}])
 
 (defn parse-create-migration-args
   [args]
