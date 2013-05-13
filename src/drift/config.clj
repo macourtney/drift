@@ -50,8 +50,9 @@
 
 (defn find-config []
   (when-let [migrate-config-namespace (find-config-namespace)]
-    (when-let [migrate-config-fn (ns-resolve migrate-config-namespace (symbol (name *config-fn-symbol*)))]
-      (migrate-config-fn))))
+    (if-let [migrate-config-fn (ns-resolve migrate-config-namespace (symbol (name *config-fn-symbol*)))]
+      (migrate-config-fn)
+      (throw (RuntimeException. (str "can't find config function: " *config-fn-symbol*))))))
 
 (defn- missing-param [param]
   (throw (java.lang.NullPointerException.

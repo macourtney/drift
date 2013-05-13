@@ -12,6 +12,10 @@
     (is config-map)
     (is (map? config-map))))
 
+(deftest test-find-config-borks
+  (binding [drift.config/*config-fn-symbol* 'config.migrate-config/bar]
+    (is (thrown? RuntimeException (find-config)))))
+
 (deftest test-current-version-fn
   (is (= println (current-version-fn {:current-version println })))
   (is (= ((migrate-config/migrate-config) :current-version) (current-version-fn)))
