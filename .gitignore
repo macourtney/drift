@@ -9,3 +9,4 @@ bin
 classes
 .lein-deps-sum
 target/
+*.clj~
