@@ -2,8 +2,10 @@
   (:use clojure.test
         drift.runner)
   (:require [drift.core :as core]
+            [drift.listener-protocol :as listener-protocol]
             [drift.version :as version]
-            [test-helper :as test-helper]))
+            [test-helper :as test-helper])
+  (:import [drift.listener_protocol ListenerProtocol]))
 
 (def first-migration "create-tests")
 (def second-migration "tests-update")
@@ -100,3 +102,15 @@
   (is (= 0 (version/current-db-version)))
   (update-to-version nil)
   (is (= 0 (version/current-db-version))))
+  
+(def test-listener (reify ListenerProtocol
+                     (start [this namespaces up?] )
+                     (running [this namespace up?] )
+                     (end [this] )))
+  
+(deftest test-listeners
+  (is (empty? (runner-listeners)))
+  (add-listener test-listener)
+  (is (= (runner-listeners) [test-listener]))
+  (remove-listener test-listener)
+  (is (empty? (runner-listeners))))
