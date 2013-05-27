@@ -35,7 +35,7 @@
     (let [namespace-name (core/namespace-name-str migration-namespace)
           namespace-symbol (symbol namespace-name)]
       (logging/info (str "Running " namespace-name " up..."))
-      (running-migration namespace-name true)
+      (running-migration namespace-name (Boolean. true))
       (require namespace-symbol)
       (when-let [up-fn (ns-resolve namespace-symbol 'up)]
         (up-fn)
@@ -49,7 +49,7 @@
     (let [namespace-name (core/namespace-name-str migration-namespace)
           namespace-symbol (symbol namespace-name)]
       (logging/info (str "Running " namespace-name " down..."))
-      (running-migration namespace-name false)
+      (running-migration namespace-name (Boolean. false))
       (require namespace-symbol)
       (when-let [down-fn (ns-resolve namespace-symbol 'down)]
         (down-fn)
@@ -62,7 +62,7 @@
   migrate-up-all
   ([] (migrate-up-all (core/migration-namespaces)))
   ([migration-namespaces]
-    (start-migration (seq migration-namespaces) true)
+    (start-migration (seq migration-namespaces) (Boolean. true))
     (let [output (when (and migration-namespaces (not-empty migration-namespaces))
                   (reduce max 0 (map run-migrate-up migration-namespaces)))]
       (end-migration)
@@ -73,7 +73,7 @@
   migrate-down-all
   ([] (migrate-down-all (reverse (core/migration-namespaces))))
   ([migration-namespaces]
-    (start-migration (seq migration-namespaces) false)
+    (start-migration (seq migration-namespaces) (Boolean. false))
     (let [output (when (and migration-namespaces (not-empty migration-namespaces))
                    (reduce min Long/MAX_VALUE (map run-migrate-down migration-namespaces)))]
       (end-migration)
