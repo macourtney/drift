@@ -2,7 +2,31 @@
   (:import [java.io File])
   (:require [clojure.tools.logging :as logging]
             [drift.core :as core]
+            [drift.listener-protocol :as listener-protocol]
             [drift.version :as version]))
+
+(def listeners (atom []))
+
+(defn add-listener [listener]
+  (swap! listeners conj listener))
+
+(defn remove-listener [listener]
+  (swap! listeners (fn [listeners listener] (remove #(= listener %) listeners)) listener))
+  
+(defn runner-listeners []
+  @listeners)
+
+(defn start-migration [namespaces ^Boolean up?]
+  (doseq [listener (runner-listeners)]
+    (listener-protocol/start listener (map core/namespace-name-str namespaces) up?)))
+  
+(defn running-migration [^String namespace ^Boolean up?]
+  (doseq [listener (runner-listeners)]
+    (listener-protocol/running listener namespace up?)))
+    
+(defn end-migration []
+  (doseq [listener (runner-listeners)]
+    (listener-protocol/end listener)))
 
 (defn
 #^{ :doc "Runs the up function in the given migration file." }
@@ -11,6 +35,7 @@
     (let [namespace-name (core/namespace-name-str migration-namespace)
           namespace-symbol (symbol namespace-name)]
       (logging/info (str "Running " namespace-name " up..."))
+      (running-migration namespace-name true)
       (require namespace-symbol)
       (when-let [up-fn (ns-resolve namespace-symbol 'up)]
         (up-fn)
@@ -24,6 +49,7 @@
     (let [namespace-name (core/namespace-name-str migration-namespace)
           namespace-symbol (symbol namespace-name)]
       (logging/info (str "Running " namespace-name " down..."))
+      (running-migration namespace-name false)
       (require namespace-symbol)
       (when-let [down-fn (ns-resolve namespace-symbol 'down)]
         (down-fn)
@@ -36,16 +62,22 @@
   migrate-up-all
   ([] (migrate-up-all (core/migration-namespaces)))
   ([migration-namespaces]
-    (when (and migration-namespaces (not-empty migration-namespaces))
-      (reduce max 0 (map run-migrate-up migration-namespaces)))))
+    (start-migration (seq migration-namespaces) true)
+    (let [output (when (and migration-namespaces (not-empty migration-namespaces))
+                  (reduce max 0 (map run-migrate-up migration-namespaces)))]
+      (end-migration)
+      output)))
 
 (defn
 #^{ :doc "Runs the down function on all of the given migration files." }
   migrate-down-all
   ([] (migrate-down-all (reverse (core/migration-namespaces))))
   ([migration-namespaces]
-    (when (and migration-namespaces (not-empty migration-namespaces))
-      (reduce min Long/MAX_VALUE (map run-migrate-down migration-namespaces)))))
+    (start-migration (seq migration-namespaces) false)
+    (let [output (when (and migration-namespaces (not-empty migration-namespaces))
+                   (reduce min Long/MAX_VALUE (map run-migrate-down migration-namespaces)))]
+      (end-migration)
+      output)))
 
 (defn
 #^{ :doc "Migrates the database up from from-version to to-version." }
