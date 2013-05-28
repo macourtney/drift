@@ -107,6 +107,6 @@ version number, then this function causes a roll back." }
       (let [version-number-min (min (max version-number 0) (core/max-migration-number))]
         (logging/info (str "Updating to version: " version-number-min))
         (if (< db-version version-number-min)
-          (migrate-up (+ db-version 1) version-number-min)
-          (migrate-down db-version (+ version-number-min 1)))))
+          (migrate-up (inc db-version) version-number-min)
+          (migrate-down db-version (inc version-number-min)))))
     (logging/error (str "Invalid version-number: " version-number))))

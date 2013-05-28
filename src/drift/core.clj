@@ -1,6 +1,6 @@
 (ns drift.core
   (:import [java.io File]
-           [java.util Comparator])
+           [java.util Comparator TreeSet])
   (:require [clojure.string :as string]
             [clojure.tools.logging :as logging]
             [clojure.tools.loading-utils :as loading-utils]
@@ -90,9 +90,12 @@
 (defn migration-compartor [ascending?]
   (reify Comparator
     (compare [this namespace1 namespace2]
-      (if ascending?
-        (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
-        (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1))))
+      (try
+        (if ascending?
+          (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
+          (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1)))
+        (catch Throwable t
+          (.printStackTrace t))))
     (equals [this object] (= this object))))
 
 (defn user-migration-namespaces []
@@ -107,7 +110,9 @@
 (defn sort-migration-namespaces
   ([migration-namespaces] (sort-migration-namespaces migration-namespaces true))
   ([migration-namespaces ascending?]
-    (sort (migration-compartor ascending?) migration-namespaces)))
+    (seq
+      (doto (TreeSet. (migration-compartor ascending?))
+        (.addAll migration-namespaces)))))
 
 (defn unsorted-migration-namespaces []
   (set (or (user-migration-namespaces) (default-migration-namespaces))))

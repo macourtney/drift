@@ -9,8 +9,8 @@
               [migrate [Long java.util.List] Void]
               [currentVersion [] Long]
               [maxMigrationNumber [] Long]
-              [addListener [drift.listener_protocol.ListenerProtocol] Void]
-              [removeListener [drift.listener_protocol.ListenerProtocol] Void]]))
+              [addListener [drift.listener_protocol.ListenerProtocol] java.util.Collection]
+              [removeListener [drift.listener_protocol.ListenerProtocol] java.util.Collection]]))
 
 (defn -init [_ other-args]
   (core/run-init other-args))
@@ -23,9 +23,9 @@
 
 (defn -maxMigrationNumber [_]
   (long (core/max-migration-number)))
-  
+
 (defn -addListener [_ listener]
   (runner/add-listener listener))
-  
+
 (defn -removeListener [_ listener]
   (runner/remove-listener listener))
