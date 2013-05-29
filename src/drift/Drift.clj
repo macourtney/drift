@@ -7,6 +7,7 @@
   (:gen-class
     :methods [[init [java.util.List] Object]
               [migrate [Long java.util.List] Void]
+              [migrationCount [Long java.util.List] Integer]
               [currentVersion [] Long]
               [maxMigrationNumber [] Long]
               [addListener [drift.listener_protocol.ListenerProtocol] java.util.Collection]
@@ -17,6 +18,9 @@
 
 (defn -migrate [_ version other-args]
   (execute/migrate version other-args))
+
+(defn -migrationCount [_ version other-args]
+  (execute/migration-count version other-args))
 
 (defn -currentVersion [_]
   (long (version/current-db-version)))

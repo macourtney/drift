@@ -13,6 +13,13 @@
       version)
     Long/MAX_VALUE))
 
+(defn migration-count
+  "Returns the total number of migrations to run to update the database to the given version number."
+  [version remaining-args]
+  (core/with-init-config remaining-args
+    (fn []
+      (runner/migration-count (version-number version)))))
+
 (defn
   migrate [version remaining-args]
   (core/with-init-config remaining-args

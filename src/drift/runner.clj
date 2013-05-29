@@ -97,6 +97,16 @@
       (logging/info "No changes were made to the database."))
     (logging/error (str "Invalid version number: " from-version " or " to-version ". No changes were made to the database."))))
 
+(defn migration-count
+  "Returns the total number of migrations to run to update the database to the given version number."
+  [version-number]
+  (if version-number
+    (let [db-version (version/current-db-version)
+          version-number-min (min (max version-number 0) (core/max-migration-number))]
+      (if (< db-version version-number-min)
+        (count (core/migration-namespaces-in-range (inc db-version) version-number-min))
+        (count (core/migration-namespaces-in-range db-version (inc version-number-min)))))))
+
 (defn 
 #^{ :doc "Updates the database to the given version number. If the version number is less than the current database 
 version number, then this function causes a roll back." }
