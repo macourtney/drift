@@ -1,6 +1,6 @@
 ;; IMPORTANT: When bumping the version number here, be sure to bump it also in
 ;; src/drift/drift_version.clj! 
-(defproject drift "1.4.7-SNAPSHOT"
+(defproject drift "1.5.0"
   :description "Drift is a rails like migration framework for Clojure."
   :dependencies [[clojure-tools "1.1.2"]
                  [org.clojure/tools.logging "0.2.3"]]
