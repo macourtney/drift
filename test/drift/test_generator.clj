@@ -1,7 +1,9 @@
 (ns drift.test-generator
   (:use clojure.test
         drift.generator
-        test-helper))
+        test-helper)
+  (:require config.finished-config
+            [drift.builder :as builder]))
 
 (deftest test-migration-usage
   (migration-usage))
@@ -17,3 +19,12 @@
 
     (generate-migration-file-cmdline
      ["-c" "foo.bar/baz" "blahblah"])))
+
+(deftest test-finished-fn-called
+  (with-redefs [builder/find-or-create-migrate-directory (fn [])
+                builder/create-migration-file (fn [dir fname])
+                drift.generator/generate-file-content (fn [migration-file migration-name ns-content up-content down-content])]
+
+    (generate-migration-file-cmdline ["-c" "config.finished-config/migrate-config" "blahblah"])
+
+    (is (= @config.finished-config/finished-run? true))))
