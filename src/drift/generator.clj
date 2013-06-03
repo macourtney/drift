@@ -42,7 +42,8 @@
         (let [migrate-directory (builder/find-or-create-migrate-directory)
               migration-file (builder/create-migration-file migrate-directory migration-name)] 
           (generate-file-content migration-file migration-name ns-content up-content down-content))
-        (migration-usage))))
+        (migration-usage))
+      (core/run-finished)))
 
 (defn generate-migration-file-cmdline
   "parse command-line args from lein, set up any custom config,
