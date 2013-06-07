@@ -2,6 +2,7 @@
   (:use clojure.test
         drift.execute)
   (:require [config.migrate-config :as config]
+            config.finished-config
             [test-helper :as test-helper]))
 
 (deftest test-version-number
@@ -51,3 +52,10 @@
                   (is (= 42 (:more-config drift.config/*config-map*))))]
 
     (run ["-version" "1234" "bloop" "-c" "config.dynamic-config/config" "blargh"])))
+
+(deftest test-finished-fn-called
+  []
+  (with-redefs [drift.runner/update-to-version (fn [version])]
+    (run ["-version" "1234" "bloop" "-c" "config.finished-config/migrate-config" "blargh"])
+
+   (is (= @config.finished-config/finished-run? true))))

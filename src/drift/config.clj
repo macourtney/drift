@@ -19,6 +19,7 @@
   {'current-version-fn :current-version
    'default-ns-content :ns-content
    'find-init-fn :init
+   'find-finished-fn :finished
    'find-migrate-dir-name :directory
    'find-src-dir :src
    'migration-namespaces :migration-namespaces
