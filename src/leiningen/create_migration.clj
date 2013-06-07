@@ -8,5 +8,5 @@
   (eval-in-project
     (update-in project [:dependencies]
       conj ['drift drift-version/version])
-    `(drift.generator/generate-migration-file '~args)
+    `(drift.generator/generate-migration-file-cmdline '~args)
     '(require 'drift.generator)))
