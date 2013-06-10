@@ -1,3 +1,3 @@
 (ns drift.drift-version)
 
-(def version "1.5.1-SNAPSHOT")
+(def version "1.5.1")
