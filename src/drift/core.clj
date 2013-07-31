@@ -27,8 +27,9 @@
     (config/with-config-map
       (merge (config/find-config) (if (map? init-config) init-config))
       (fn []
-        (f)
-        (run-finished)))))
+        (let [result (f)]
+          (run-finished)
+          result)))))
 
 (defn
 #^{:doc "Returns the directory where Conjure is running from."}

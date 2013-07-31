@@ -1,5 +1,6 @@
 (ns drift.execute
-  (:require [drift.args :as args]
+  (:require [clojure.tools.logging :as logging]
+            [drift.args :as args]
             [drift.config :as config]
             [drift.core :as core]
             [drift.runner :as runner]))

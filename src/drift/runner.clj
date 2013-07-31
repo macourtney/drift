@@ -100,7 +100,7 @@
 (defn migration-count
   "Returns the total number of migrations to run to update the database to the given version number."
   [version-number]
-  (if version-number
+  (when version-number
     (let [db-version (version/current-db-version)
           version-number-min (min (max version-number 0) (core/max-migration-number))]
       (if (< db-version version-number-min)
