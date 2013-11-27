@@ -8,6 +8,9 @@
 (defn init-flavor [args]
   (println "Initializing drift."))
 
+(defn finished []
+  (println "Action has been run."))
+
 (defn migrate-namespaces [migrate-dir-name migrate-namespace-prefix]
   (migration-namespaces))
 
@@ -41,6 +44,9 @@
      ; function must accept a single argument which will be a list of arguments passed to drift excluding the version
      ; argument. Init may be called multiple times before the migrations are run. Optional.
      :init init-flavor
+
+     ; This is a function which will be called after the action has been run. Optional.
+     :finished finished
 
      ; This is a function which returns the next number to use when creating a new migration file. There are two
      ; migration number generators included with Drift: incremental-migration-number-generator and
