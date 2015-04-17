@@ -101,8 +101,8 @@
     (compare [this namespace1 namespace2]
       (try
         (if ascending?
-          (- (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
-          (- (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1)))
+          (.compareTo (migration-number-from-namespace namespace1) (migration-number-from-namespace namespace2))
+          (.compareTo (migration-number-from-namespace namespace2) (migration-number-from-namespace namespace1)))
         (catch Throwable t
           (.printStackTrace t))))
     (equals [this object] (= this object))))
