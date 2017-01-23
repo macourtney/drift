@@ -5,6 +5,9 @@ Rails migrations where a directory in your project contains all of the
 migration files. Drift will detect which migration files need to be
 run and run them as appropriate.
 
+Migration files must contain an `up` and `down` function in which you can
+perform the migration using your prefered database library.
+
 ## Usage
 
 To use Drift you'll need to add drift to your Leiningen
@@ -91,6 +94,26 @@ holding the current database version:
 (defn update-db-version [version]
   (sql/with-connection DB
     (sql/insert-values :schema_migrations [:version] [version])))
+```
+
+Your migration files must contain an `up` and `down` function in which you
+perform the migration and rollback using your prefered database library.
+
+For example:
+
+```clojure
+ (ns migrations.001-create-authors-table
+  (:require [clojure.java.jdbc :as j])
+
+(def mysql-db { :dbtype "mysql" :dbname "my_db" :user "root" })
+
+(defn up []
+  (j/query mysql-db
+    ["CREATE TABLE authors(id INT PRIMARY KEY)"]))
+
+(defn down []
+  (j/query mysql-db
+    ["DROP TABLE authors"]))
 ```
 
 ## Initialization
