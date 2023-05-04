@@ -112,9 +112,11 @@
     (migration-namespaces (config/find-migrate-dir-name) (migrate-namespace-prefix))))
 
 (defn default-migration-namespaces []
-  (map namespace-string-for-file
-       (filter #(re-matches #".*\.clj$" %)
-               (loading-utils/all-class-path-file-names (migrate-namespace-dir)))))
+  (->> (find-migrate-directory)
+       .listFiles
+       (map #(.getName ^File %))
+       (filter #(re-matches #".*\.clj$" %))
+       (map namespace-string-for-file)))
 
 (defn sort-migration-namespaces
   ([migration-namespaces] (sort-migration-namespaces migration-namespaces true))
