@@ -1,8 +1,10 @@
 (ns drift.generator
-  (:require [drift.args :as args]
+  (:require [clojure.string :as string]
+            [clojure.tools.logging :as logging]
+            [drift.args :as args]
             [drift.builder :as builder]
-            [drift.core :as core]
-            [drift.config :as config]))
+            [drift.config :as config]
+            [drift.core :as core]))
 
 (defn
 #^{ :doc "Prints out how to use the generate migration command." }
@@ -13,7 +15,7 @@
 (defn
   create-file-content [migration-namespace ns-content up-content down-content]
   (let [migration-number (core/migration-number-from-namespace migration-namespace)]
-    (str "(ns " migration-namespace (or ns-content (config/default-ns-content))  ")
+    (str "(ns " migration-namespace (or ns-content (config/default-ns-content)) ")
 
 (defn up
   \"Migrates the database up to version " migration-number ".\"
@@ -49,8 +51,11 @@
   "parse command-line args from lein, set up any custom config,
    and invoke generate-migration-file"
   [args]
-  (let [[opts remaining] (args/parse-create-migration-args args)
-        migration-name (first remaining)]
-    (config/with-config-fn-symbol (:config opts)
-      (fn []
-        (generate-migration-file migration-name)))))
+  (let [[opts [migration-name & remaining]] (args/parse-create-migration-args args)]
+    (if (empty? remaining)
+      (config/with-config-fn-symbol
+        (:config opts)
+        (fn []
+          (generate-migration-file migration-name)))
+      (do (logging/error "Invalid arguments:" (string/join " " remaining))
+          (args/print-usage "create-migration" args/create-migration-arg-specs "migration-name")))))

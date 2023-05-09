@@ -1,10 +1,12 @@
-(ns drift.args)
+(ns drift.args
+  (:require [clojure.string :as string]
+            [drift.config :as config]))
 
 (defn split-args
   "split an arglist using a matcher fn : returns
    [args-before-match, args-including-and-after-match]"
   [args matcher]
-  (split-with #(not (matcher %)) args))
+  (split-with #(not-any? (partial = %) matcher) args))
 
 (defn remove-opt
   "given a matched option and whatever is after it in the arg list, remove the option
@@ -27,22 +29,35 @@
           [{} args]
           specs))
 
+(def config-arg-spec
+  {:key :config
+   :matcher ["-c" "-config" "--config"]
+   :parser symbol
+   :default config/default-config-fn-symbol
+   :desc "Fully qualified name of function returning a Drift configuration map."})
+
 (def migrate-arg-specs
   [{:key :version
-    :matcher #{"-v" "-version" "--version"}}
-   {:key :config
-    :matcher #{"-c" "-config" "--config"}
-    :parser symbol}])
+    :matcher ["-v" "-version" "--version"]
+    :desc "The version number to migrate to. Can be lower than the current version to roll back migrations."}
+   config-arg-spec])
 
 (defn parse-migrate-args
   [args]
   (parse-args args migrate-arg-specs))
 
 (def create-migration-arg-specs
-  [{:key :config
-    :matcher #{"-c" "-config" "--config"}
-    :parser symbol}])
+  [config-arg-spec])
 
 (defn parse-create-migration-args
   [args]
   (parse-args args create-migration-arg-specs))
+
+(defn print-usage
+  #^{:doc "Prints out how to use a command with a given name and specification."}
+  [cmd spec & [required-arg]]
+  (println "Usage: lein" cmd "[options]" (or required-arg ""))
+  (println "Options:")
+  (doseq [arg spec]
+    (println (str " " (string/join " " (:matcher arg)) "\t" (:desc arg)))
+    (when (:default arg) (println "\t\t\tDefault value:" (:default arg)))))

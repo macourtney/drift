@@ -1,5 +1,6 @@
 (ns drift.execute
-  (:require [clojure.tools.logging :as logging]
+  (:require [clojure.string :as string]
+            [clojure.tools.logging :as logging]
             [drift.args :as args]
             [drift.config :as config]
             [drift.core :as core]
@@ -30,6 +31,10 @@
 (defn
   run [args]
   (let [[opts remaining] (args/parse-migrate-args args)]
-    (config/with-config-fn-symbol (:config opts)
-      (fn []
-        (migrate (:version opts) remaining)))))
+    (if (empty? remaining)
+      (config/with-config-fn-symbol
+        (:config opts)
+        (fn []
+          (migrate (:version opts) remaining)))
+      (do (logging/error "Invalid arguments:" (string/join " " remaining))
+          (args/print-usage "migrate" args/migrate-arg-specs)))))
