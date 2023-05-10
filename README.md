@@ -31,6 +31,10 @@ If you're using drift with lein2, you'll need to add it to the :plugins list in 
 To set your Drift migration directory, simply add a clojure file
 called "migrate_config.clj" to the directory "src/config".
 
+If you require using a different namespace and/or function name,
+this can be overridden on the command line or in the project configuration,
+see [Custom configuration namespace/function name](#custom-config-ns).
+
 Your migrate_config.clj file should look something like:
 
 ```clojure
@@ -176,6 +180,23 @@ To create a new migration file which you can then edit:
 
 ```bash
 $ lein create-migration <migration name>
+```
+
+<a name="custom-config-ns"></a>
+### Custom configuration namespace/function name
+
+You can use a different configuration namespace or function by setting it in the Leiningen project configuration:
+
+```clojure
+:drift-config my-config.space/my-config-fn
+```
+
+This can be set in a profile (e.g. separate functions for different profiles) or on the top level.
+
+Optionally you can specify the function on the command line:
+
+```bash
+$ lein migrate -config my-config.space/my-config-fn
 ```
 
 ## Calling Drift From Java

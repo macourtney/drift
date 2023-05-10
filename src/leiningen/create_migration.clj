@@ -5,8 +5,11 @@
 
 (defn create-migration [project & args]
   "Create a new migration file."
-  (eval-in-project
-    (update-in project [:dependencies]
-      conj ['drift drift-version/version])
-    `(drift.generator/generate-migration-file-cmdline '~args)
-    '(require 'drift.generator)))
+  (let [drift-config (-> project
+                         :drift-config
+                         (#(when % (symbol %))))]
+    (eval-in-project
+      (update-in project [:dependencies]
+                 conj ['drift drift-version/version])
+      `(drift.generator/generate-migration-file-cmdline '~drift-config '~args)
+      '(require 'drift.generator))))

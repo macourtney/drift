@@ -50,11 +50,11 @@
 (defn generate-migration-file-cmdline
   "parse command-line args from lein, set up any custom config,
    and invoke generate-migration-file"
-  [args]
+  [config-fn-symbol args]
   (let [[opts [migration-name & remaining]] (args/parse-create-migration-args args)]
     (if (empty? remaining)
       (config/with-config-fn-symbol
-        (:config opts)
+        (or (:config opts) config-fn-symbol)
         (fn []
           (generate-migration-file migration-name)))
       (do (logging/error "Invalid arguments:" (string/join " " remaining))

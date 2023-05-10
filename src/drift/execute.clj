@@ -29,11 +29,11 @@
       (runner/update-to-version (version-number version)))))
 
 (defn
-  run [args]
+  run [config-fn-symbol args]
   (let [[opts remaining] (args/parse-migrate-args args)]
     (if (empty? remaining)
       (config/with-config-fn-symbol
-        (:config opts)
+        (or (:config opts) config-fn-symbol)
         (fn []
           (migrate (:version opts) remaining)))
       (do (logging/error "Invalid arguments:" (string/join " " remaining))

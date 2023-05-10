@@ -5,8 +5,11 @@
 
 (defn migrate [project & args]
   "Run migration scripts."
-  (eval-in-project
-    (update-in project [:dependencies]
-      conj ['drift drift-version/version])
-    `(drift.execute/run '~args)
-    '(require 'drift.execute)))
+  (let [drift-config (-> project
+                         :drift-config
+                         (#(when % (symbol %))))]
+    (eval-in-project
+      (update-in project [:dependencies]
+                 conj ['drift drift-version/version])
+      `(drift.execute/run '~drift-config '~args)
+      '(require 'drift.execute)))
